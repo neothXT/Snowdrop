@@ -217,36 +217,9 @@ Once your Access Token Storage is ready, assign it by invoking `Netty.Config.set
 
 #### Access Token Refresh Automation
 
-Upon expanding macros, for each service Netty adds to it conformance to Recoverable protocol. That means, each service has `onAuthRetry` property which is called whenever request fails due to authentication error (401).
+Upon expanding macros, for each service Netty adds to it conformance to Recoverable protocol. That means, each service has `onAuthRetry` property which is called whenever request fails due to authentication error (401). You should put your access token refresh logic in it like:
 
-If you have only one request that should be called whenever authentication fails, just mark with `@TokenRefresh` macro like:
-
-```Swift
-@GET(url: "/token")
-@TokenRefresh
-func getToken() async throws -> MyToken
-```
-
-However, if you have - let's say - one call to fetch the token and another to refresh it, you can provide your own implementation of `onAuthRetry` like:
-
-```Swift
-
-struct MyToken: AccessTokenConvertible {
-    // struct field declarations
-}
-
-@Service(url: "https://my-endpoint.com")
-@TokenLabel("My label")
-protocol MyEndpoint {
-    
-    @GET(url: "/token")
-    func getToken() async throws -> MyToken
-    
-    @POST(url: "/token/refresh")
-    @Body("oldToken")
-    func refreshToken(oldToken: MyToken) async throws -> MyToken
-}  
-  
+```Swift 
 MyEndpointService.onAuthRetry = { service in
     if let token = Netty.Config.accessTokenStorage.fetch(for: MyEndpointService.tokenLabel) {
         return try await service.refreshToken(oldToken: token)
