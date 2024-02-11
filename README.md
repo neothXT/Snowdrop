@@ -25,6 +25,7 @@ Meet Netty - type-safe, easy to use framework powered by Swift Macros created to
         - [Access Token Refresh Automation](#access-token-refresh-automation)
         - [Custom Access Token storage key](#custom-access-token-storage-key)
     - [Interceptions](#interceptions)
+- [Acknowledgements](#acknowledgements)
 
 ## Installation
 
@@ -260,3 +261,7 @@ MyEndpointService.onResponse = { data, urlResponse in
 ```
 
 Those interceptors are then called for each MyEndpointService function's call.
+
+## Acknowledgements
+
+Retrofit was an inspiration for Netty.
