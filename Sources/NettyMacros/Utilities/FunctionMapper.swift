@@ -11,7 +11,7 @@ import SwiftSyntax
 class FunctionMapper {
     private init() {}
     
-    static func map(accessModifier: String, declaration decl: FunctionDeclSyntax) throws -> String {
+    static func map(accessModifier: String, declaration decl: FunctionDeclSyntax, serviceName: String) throws -> String {
         guard let passedArguments = decl.getPassedArguments(),
               let url = passedArguments.url else {
             throw RequestMacroError.badOrMissingUrlParameter
@@ -45,7 +45,8 @@ class FunctionMapper {
             body: body,
             returnType: returnType,
             requiresAccessToken: passedArguments.requiresAccessToken,
-            isUploadingFile: passedArguments.isUploadingFile
+            isUploadingFile: passedArguments.isUploadingFile,
+            serviceName: serviceName
         )
         
         if passedArguments.isUploadingFile {

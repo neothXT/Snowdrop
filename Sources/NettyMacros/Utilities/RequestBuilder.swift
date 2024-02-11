@@ -28,7 +28,7 @@ class RequestBuilder {
         
         if details.requiresAccessToken {
             requestImpl += """
-                let token = Netty.Config.accessTokenStorage.fetch(for: tokenLabel)?.access_token
+                let token = Netty.Config.accessTokenStorage.fetch(for: \(details.serviceName).tokenLabel)?.access_token
                 request.addValue("Bearer \\(token ?? "")", forHTTPHeaderField: "Authorization")\n\n
             """
         }
@@ -56,14 +56,16 @@ class RequestBuilder {
         }
         
         requestImpl += """
-            request = beforeSending?(request) ?? request
+            request = \(details.serviceName).beforeSending?(request) ?? request
             let session = Netty.Config.getSession()
         
             return try await Netty.Core.sendRequest(session: session,
                                                     request: request,
                                                     requiresAccessToken: \(details.requiresAccessToken), 
-                                                    tokenLabel: tokenLabel, 
-                                                    onResponse: onResponse)
+                                                    tokenLabel: \(details.serviceName).tokenLabel, 
+                                                    onResponse: \(details.serviceName).onResponse) {
+                try await \(details.serviceName).onAuthRetry?(self)
+            }
         """
         
         return requestImpl
@@ -79,5 +81,6 @@ extension RequestBuilder {
         let returnType: String
         let requiresAccessToken: Bool
         let isUploadingFile: Bool
+        let serviceName: String
     }
 }

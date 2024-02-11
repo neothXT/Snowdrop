@@ -23,7 +23,7 @@ final class NettyTests: XCTestCase {
     
     func testQueryItems() async throws {
         let expectation = expectation(description: "Should contain queryItems")
-        service.beforeSending = { request in
+        TestEndpointService.beforeSending = { request in
             if request.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/12?test=true" {
                 expectation.fulfill()
             }
@@ -36,7 +36,7 @@ final class NettyTests: XCTestCase {
     
     func testInterception() async throws {
         let expectation = expectation(description: "Should intercept request")
-        service.beforeSending = { request in
+        TestEndpointService.beforeSending = { request in
             if request.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/7/comments" {
                 expectation.fulfill()
             }
@@ -49,13 +49,13 @@ final class NettyTests: XCTestCase {
     
     func testOnResponse() async throws {
         let expectation = expectation(description: "Should intercept response")
-        service.onResponse = { data, urlResponse in
-            if urlResponse.statusCode == 200 {
+        TestEndpointService.onResponse = { data, urlResponse in
+            if urlResponse.statusCode == 200 && urlResponse.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/9/comments" {
                 expectation.fulfill()
             }
             return data
         }
-        _ = try await service.getComments(id: 7)
+        _ = try await service.getComments(id: 9)
         
         await fulfillment(of: [expectation], timeout: 5)
     }

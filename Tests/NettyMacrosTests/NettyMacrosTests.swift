@@ -31,12 +31,13 @@ final class NettyMacrosTests: XCTestCase {
                 func getPosts(for id: Int, model: Model) async throws -> Post
             }
             
-            class TestEndpointService {
+            class TestEndpointService: Recoverable {
                 private let baseUrl = URL(string: "https://google.com")!
-                private let tokenLabel = "TestToken"
+                static public let tokenLabel = "TestToken"
             
-                var beforeSending: ((URLRequest) -> URLRequest)?
-                var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+                static var beforeSending: ((URLRequest) -> URLRequest)?
+                static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+                static var onAuthRetry: ((TestEndpointService) async throws -> AccessTokenConvertible)?
 
                 func getPosts(for id: Int = 2, model: Model, queryItems: [URLQueryItem] = []) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/posts/\\(id)")
@@ -54,7 +55,7 @@ final class NettyMacrosTests: XCTestCase {
                         request.addValue("\\(value)", forHTTPHeaderField: key)
                     }
             
-                    let token = Netty.Config.accessTokenStorage.fetch(for: tokenLabel)?.access_token
+                    let token = Netty.Config.accessTokenStorage.fetch(for: TestEndpointService.tokenLabel)?.access_token
                     request.addValue("Bearer \\(token ?? "")", forHTTPHeaderField: "Authorization")
             
                     var data: Data?
@@ -67,14 +68,16 @@ final class NettyMacrosTests: XCTestCase {
             
                     request.httpBody = data
             
-                    request = beforeSending?(request) ?? request
+                    request = TestEndpointService.beforeSending?(request) ?? request
                     let session = Netty.Config.getSession()
             
                     return try await Netty.Core.sendRequest(session: session,
                                                             request: request,
                                                             requiresAccessToken: true,
-                                                            tokenLabel: tokenLabel,
-                                                            onResponse: onResponse)
+                                                            tokenLabel: TestEndpointService.tokenLabel,
+                                                            onResponse: TestEndpointService.onResponse) {
+                        try await TestEndpointService.onAuthRetry?(self)
+                    }
                 }
             }
             """,
@@ -107,12 +110,13 @@ final class NettyMacrosTests: XCTestCase {
                 func uploadFile(file: UIImage) async throws -> Post
             }
             
-            public class TestEndpointService {
+            public class TestEndpointService: Recoverable {
                 private let baseUrl = URL(string: "https://google.com")!
-                private let tokenLabel = "NettyToken"
+                static public let tokenLabel = "NettyToken"
             
-                public var beforeSending: ((URLRequest) -> URLRequest)?
-                public var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+                public static var beforeSending: ((URLRequest) -> URLRequest)?
+                public static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+                public static var onAuthRetry: ((TestEndpointService) async throws -> AccessTokenConvertible)?
             
                 public func uploadFile(file: UIImage, payloadDescription: PayloadDescription, queryItems: [URLQueryItem] = []) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/file")
@@ -136,14 +140,16 @@ final class NettyMacrosTests: XCTestCase {
             
                     request.httpBody = Netty.Core.dataWithBoundary(file, payloadDescription: payloadDescription)
             
-                    request = beforeSending?(request) ?? request
+                    request = TestEndpointService.beforeSending?(request) ?? request
                     let session = Netty.Config.getSession()
             
                     return try await Netty.Core.sendRequest(session: session,
                                                             request: request,
                                                             requiresAccessToken: false,
-                                                            tokenLabel: tokenLabel,
-                                                            onResponse: onResponse)
+                                                            tokenLabel: TestEndpointService.tokenLabel,
+                                                            onResponse: TestEndpointService.onResponse) {
+                        try await TestEndpointService.onAuthRetry?(self)
+                    }
                 }
             }
             """,

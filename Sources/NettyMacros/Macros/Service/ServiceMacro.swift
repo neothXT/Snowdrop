@@ -33,7 +33,7 @@ public struct ServiceMacro: PeerMacro {
             guard let fDecl = member.decl.as(FunctionDeclSyntax.self) else { return nil }
             var function: String?
             do {
-                function = try FunctionMapper.map(accessModifier: accessModifier, declaration: fDecl)
+                function = try FunctionMapper.map(accessModifier: accessModifier, declaration: fDecl, serviceName: name)
             } catch {
                 context.diagnose((error as! Diagnostics).generate(for: member, severity: .error, fixIts: []))
             }
@@ -41,12 +41,13 @@ public struct ServiceMacro: PeerMacro {
         }.joined(separator: "\n\n")
         
         return ["""
-        \(raw: accessModifier)class \(raw: name) {
+        \(raw: accessModifier)class \(raw: name): Recoverable {
             private let baseUrl = URL(string: "\(raw: urlString)")!
-            private let tokenLabel = "\(raw: tokenLabel)"
+            static public let tokenLabel = "\(raw: tokenLabel)"
         
-            \(raw: accessModifier)var beforeSending: ((URLRequest) -> URLRequest)?
-            \(raw: accessModifier)var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+            \(raw: accessModifier)static var beforeSending: ((URLRequest) -> URLRequest)?
+            \(raw: accessModifier)static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+            \(raw: accessModifier)static var onAuthRetry: ((\(raw: name)) async throws -> AccessTokenConvertible)?
         
         \(raw: functions)
         }

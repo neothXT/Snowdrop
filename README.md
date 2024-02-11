@@ -13,6 +13,7 @@ Meet Netty - type-safe, easy to use framework powered by Swift Macros created to
     - [Request Execution](#request-execution)
 - [Advanced Usage](#advanced-usage)
     - [Configuration](#configuration)
+        - [Default JSON Decoder](#default-json-decoder)
         - [SSL/Certificate Pinning](#sslcertificate-pinning)
         - [Access Token Storage](#access-token-storage)
     - [Body Argument](#body-argument)
@@ -20,8 +21,8 @@ Meet Netty - type-safe, easy to use framework powered by Swift Macros created to
     - [Query Parameters](#query-parameters)
     - [Arguments' Default Values](#arguments-default-values)
     - [Authorization](#authorization)
-        - [Access Token Refresh Automation](#access-token-refresh-automation)
         - [Defining Custom Access Token Storage](#defining-custom-access-token-storage)
+        - [Access Token Refresh Automation](#access-token-refresh-automation)
         - [Custom Access Token storage key](#custom-access-token-storage-key)
     - [Interceptions](#interceptions)
 
@@ -57,7 +58,7 @@ Creating network services with Netty is really easy. Just declare a protocol alo
 @Service(url: "https://my-endpoint.com")
 protocol MyEndpoint {
 
-    @GET(url: "posts")
+    @GET(url: "/posts")
     func getAllPosts() async throws -> [Post]
 }
 ```
@@ -67,7 +68,7 @@ If your request includes some dynamic values, such as `id`, you can add it to yo
 WARNING: You should not name your path variables "queryItems" or "payloadDescription".
 
 ```Swift
-@GET(url: "posts/{id}")
+@GET(url: "/posts/{id}")
 func getPost(id: Int) async throws -> Post
 ```
 
@@ -98,22 +99,36 @@ let post = try await getPost(id: 7)
 
 ### Configuration
 
--
+Netty's config allows you to set/change framework's global settings.
+
+### Default JSON Decoder
+
+If you need to change default json decoder, you can set your own decoder to `Netty.Config.defaultJSONDecoder`.
 
 #### SSL/Certificate Pinning
 
--
+By default SSL/Certificate pinning is turned OFF. To enable it, use `Netty.Config.pinningModes`. Possible settings are:
+
+```Swift
+Netty.Config.pinningModes = .ssl
+// or
+Netty.Config.pinningModes = .certificate
+// or
+Netty.Config.pinningModes = [.ssl, .certificate]
+```
+
+If you want to exclude some URLs from SSL/Certificate pinning, add them to `Netty.Config.urlsExcludedFromPinning`.
 
 #### Access Token Storage
 
--
+`Netty.Config.accessTokenStorage` allows you to define your own storage for your access tokens. The default storage saves your tokens in RAM until your app is killed.
 
 ### Body Argument
 
 If you want to put some encodable object as a body of your request, use `@Body` macro like:
 
 ```Swift
-@POST(url: "posts")
+@POST(url: "/posts")
 @Body("model")
 func addPost(model: Post) async throws -> Data
 ```
@@ -128,7 +143,7 @@ protocol MyEndpoint {
 
     @FileUpload
     @Body("image")
-    @POST(url: "uploadAvatar/")
+    @POST(url: "/uploadAvatar/")
     func uploadImage(_ image: UIImage) async throws -> Data
 }
 
@@ -145,7 +160,7 @@ Upon expanding macros, Netty adds argument `queryItems: [URLQueryItem]` to every
 @Service(url: "https://my-endpoint.com")
 protocol MyEndpoint {
 
-    @GET(url: "posts/{id}")
+    @GET(url: "/posts/{id}")
     func getPost(id: Int) async throws -> Post
 }
 
@@ -157,7 +172,7 @@ let post = try await service.getPost(id: 7, queryItems: [.init(name: "author", v
 However, if you want to add static query parameters to your request, you may also include them in your path like:
 
 ```Swift
-@GET(url: "posts/{id}?myStaticParam=value")
+@GET(url: "/posts/{id}?myStaticParam=value")
 func getPost(id: Int) async throws -> Post
 ```
  
@@ -169,15 +184,79 @@ Netty allows you to define custom values for your arguments. Let's say your path
 
 ### Authorization
 
--
+To let Netty know a request requires access token, use `@RequiresAccessToken` macro like:
 
-#### Access Token Refresh Automation
+```Swift
+@GET(url: "/posts")
+@RequiresAccessToken
+func getAllPosts() async throws -> [Post]
+```
 
--
+WARNING: For Netty to be able to work with your access token regardless of its structure, make sure your token model conforms to `AccessTokenConvertible` protocol.
+
+```Swift
+public protocol AccessTokenConvertible: Codable {
+    func convert() -> AccessToken?
+}
+```
 
 #### Defining Custom Access Token Storage
 
--
+Netty comes with default access token storage that saves your tokens in RAM until your app is killed but you can also provide your own storage.
+When doing so, remember that your storage has to conform to `AccessTokenStorage` protocol.
+
+```Swift
+public protocol AccessTokenStorage {
+    func store(_ token: AccessToken?, for storingLabel: String)
+    func fetch(for storingLabel: String) -> AccessToken?
+    func delete(for storingLabel: String) -> Bool
+}
+```
+
+Once your Access Token Storage is ready, assign it by invoking `Netty.Config.setAccessTokenStorage(_ storage: AccessTokenStorage)`.
+
+#### Access Token Refresh Automation
+
+Upon expanding macros, for each service Netty adds to it conformance to Recoverable protocol. That means, each service has `onAuthRetry` property which is called whenever request fails due to authentication error (401).
+
+If you have only one request that should be called whenever authentication fails, just mark with `@TokenRefresh` macro like:
+
+```Swift
+@GET(url: "/token")
+@TokenRefresh
+func getToken() async throws -> MyToken
+```
+
+However, if you have - let's say - one call to fetch the token and another to refresh it, you can provide your own implementation of `onAuthRetry` like:
+
+```Swift
+
+struct MyToken: AccessTokenConvertible {
+    // struct field declarations
+}
+
+@Service(url: "https://my-endpoint.com")
+@TokenLabel("My label")
+protocol MyEndpoint {
+    
+    @GET(url: "/token")
+    func getToken() async throws -> MyToken
+    
+    @POST(url: "/token/refresh")
+    @Body("oldToken")
+    func refreshToken(oldToken: MyToken) async throws -> MyToken
+}  
+  
+MyEndpointService.onAuthRetry = { service in
+    if let token = Netty.Config.accessTokenStorage.fetch(for: MyEndpointService.tokenLabel) {
+        return try await service.refreshToken(oldToken: token)
+    } else {
+        return try await service.getToken()
+    }
+}
+```
+
+You can also change which error codes should trigger `onAuthRetry` by setting `Netty.Config.accessTokenErrorCodes` value.
 
 #### Custom Access Token storage key
 
@@ -193,17 +272,15 @@ protocol MyEndpoint {
 
 ### Interceptions
 
-Each service provides two interceptors - `beforeSending` and `onResponse`. You should use them like:
+Each service provides two static interceptors - `beforeSending` and `onResponse`. You should use them like:
 
 ```Swift
-let service = MyEndpointService()
-
-service.beforeSending = { request in
+MyEndpointService.beforeSending = { request in
     // some operations
     return request
 }
 
-service.onResponse = { data, urlResponse in
+MyEndpointService.onResponse = { data, urlResponse in
     // some operations
     return data
 }

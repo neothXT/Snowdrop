@@ -41,3 +41,5 @@ public protocol TestEndpoint {
     @Body("model")
     func addPost(model: Post) async throws -> Post
 }
+
+

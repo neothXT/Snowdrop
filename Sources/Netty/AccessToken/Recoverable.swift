@@ -8,5 +8,5 @@
 import Foundation
 
 public protocol Recoverable {
-    func retryAuthentication() async throws -> AccessTokenConvertible
+    static var onAuthRetry: ((Self) async throws -> AccessTokenConvertible)? { get set }
 }
