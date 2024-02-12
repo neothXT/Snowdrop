@@ -5,7 +5,7 @@ import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "Netty",
+    name: "Snowdrop",
     platforms: [
         .macOS(.v11),
         .iOS(.v14)
@@ -13,8 +13,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "Netty",
-            targets: ["Netty"])
+            name: "Snowdrop",
+            targets: ["Snowdrop"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -25,22 +25,22 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .macro(
-            name: "NettyMacros",
+            name: "SnowdropMacros",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]
         ),
         .target(
-            name: "Netty",
-            dependencies: ["NettyMacros"]),
+            name: "Snowdrop",
+            dependencies: ["SnowdropMacros"]),
         .testTarget(
-            name: "NettyTests",
-            dependencies: ["Netty", "NettyMacros"]),
+            name: "SnowdropTests",
+            dependencies: ["Snowdrop", "SnowdropMacros"]),
         .testTarget(
-            name: "NettyMacrosTests",
+            name: "SnowdropMacrosTests",
             dependencies: [
-                "NettyMacros",
+                "SnowdropMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
             ]
         )
