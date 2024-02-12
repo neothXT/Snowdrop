@@ -56,7 +56,7 @@ Snowdrop is available via SPM. It works with iOS Deployment Target has to be 14.
 Creating network services with Snowdrop is really easy. Just declare a protocol along with its functions. 
 
 ```Swift
-@Service(url: "https://my-endpoint.com")
+@Service
 protocol MyEndpoint {
 
     @GET(url: "/posts")
@@ -92,7 +92,7 @@ class MyEndpointService: MyEndpoint {
 To send requests, just initialize `MyEndpointService` instance and call function corresponding to the request you want to execute.
 
 ```Swift
-let service = MyEndpointService()
+let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
 let post = try await getPost(id: 7)
 ```
 
@@ -139,7 +139,7 @@ func addPost(model: Post) async throws -> Data
 If you want to declare service's function that sends some file to the server as `multipart/form-data`, use `@FileUpload` macro. It'll automatically add `Content-Type: multipart/form-data` to the request's headers and extend the list of your function's arguments with `payloadDescription: PayloadDescription` which you should then use to provide information such as `name`, `fileName` and `mimeType`.
 
 ```Swift
-@Service(url: "https://my-endpoint.com")
+@Service
 protocol MyEndpoint {
 
     @FileUpload
@@ -149,7 +149,7 @@ protocol MyEndpoint {
 }
 
 let payload = PayloadDescription(name: "avatar", fileName: "filename.jpeg", mimeType: "image/jpeg")
-let service = MyEndpointService()
+let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
 _ = try await service.uploadImage(someImage, payloadDescription: payload)
 ```
 
@@ -158,7 +158,7 @@ _ = try await service.uploadImage(someImage, payloadDescription: payload)
 Upon expanding macros, Snowdrop adds argument `queryItems: [URLQueryItem]` to every service's function. For dynamic query parameters it's recommended to pass them using this argument like:
 
 ```Swift
-@Service(url: "https://my-endpoint.com")
+@Service
 protocol MyEndpoint {
 
     @GET(url: "/posts/{id}")
@@ -166,7 +166,7 @@ protocol MyEndpoint {
 }
 
 let authorName = "John Smith"
-let service = MyEndpointService()
+let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
 let post = try await service.getPost(id: 7, queryItems: [.init(name: "author", value: authorName)])
 ```
 
@@ -237,7 +237,7 @@ You can also change which error codes should trigger `onAuthRetry` by setting `S
 By default, Snowdrop uses "SnowdropToken" as an access token storage key for each service. If you want to use some other name, use `@TokenLabel` macro like:
 
 ```Swift
-@Service(url: "https://my-endpoint.com")
+@Service
 @TokenLabel("My label")
 protocol MyEndpoint {
     // function declarations

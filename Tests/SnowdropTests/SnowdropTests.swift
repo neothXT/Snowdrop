@@ -9,7 +9,7 @@ import XCTest
 @testable import Snowdrop
 
 final class SnowdropTests: XCTestCase {
-    private let service = TestEndpointService()
+    private let service = TestEndpointService(baseUrl: URL(string: "https://jsonplaceholder.typicode.com")!)
 
     func testGetTask() async throws {
         let result = try await service.getPost()

@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Service macro
 @attached(peer, names: suffixed(Service))
-public macro Service(url: String) = #externalMacro(module: "SnowdropMacros", type: "ServiceMacro")
+public macro Service() = #externalMacro(module: "SnowdropMacros", type: "ServiceMacro")
 
 // MARK: - Modifier macros
 @attached(peer)

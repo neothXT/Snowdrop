@@ -14,16 +14,11 @@ import Foundation
 public struct ServiceMacro: PeerMacro {
     public static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
         guard let decl = declaration.as(ProtocolDeclSyntax.self),
-              let passedArguments = decl.getPassedArguments(),
-              let urlString = passedArguments.url else {
+              let passedArguments = decl.getPassedArguments() else {
             throw ServiceMacroError.badType
         }
         
         let access = decl.modifiers.first?.name.text ?? ""
-        
-        guard let _ = URL(string: urlString) else {
-            throw ServiceMacroError.badOrMissingParameter
-        }
         
         let name = decl.name.text + "Service"
         let tokenLabel = passedArguments.tokenLabel ?? "SnowdropToken"
@@ -42,12 +37,16 @@ public struct ServiceMacro: PeerMacro {
         
         return ["""
         \(raw: accessModifier)class \(raw: name): Recoverable {
-            private let baseUrl = URL(string: "\(raw: urlString)")!
+            private let baseUrl: URL
             static public let tokenLabel = "\(raw: tokenLabel)"
         
             \(raw: accessModifier)static var beforeSending: ((URLRequest) -> URLRequest)?
             \(raw: accessModifier)static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
             \(raw: accessModifier)static var onAuthRetry: ((\(raw: name)) async throws -> AccessTokenConvertible)?
+        
+            \(raw: accessModifier)init(baseUrl: URL) {
+                self.baseUrl = baseUrl
+            }
         
         \(raw: functions)
         }

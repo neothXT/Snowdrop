@@ -14,7 +14,7 @@ final class SnowdropMacrosTests: XCTestCase {
     func testEndpointMacro() throws {
         assertMacroExpansion(
             """
-            @Service(url: "https://google.com")
+            @Service
             @TokenLabel("TestToken")
             protocol TestEndpoint {
                 @GET(url: "/posts/{id=2}")
@@ -32,12 +32,16 @@ final class SnowdropMacrosTests: XCTestCase {
             }
             
             class TestEndpointService: Recoverable {
-                private let baseUrl = URL(string: "https://google.com")!
+                private let baseUrl: URL
                 static public let tokenLabel = "TestToken"
             
                 static var beforeSending: ((URLRequest) -> URLRequest)?
                 static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
                 static var onAuthRetry: ((TestEndpointService) async throws -> AccessTokenConvertible)?
+            
+                init(baseUrl: URL) {
+                    self.baseUrl = baseUrl
+                }
 
                 func getPosts(for id: Int = 2, model: Model, queryItems: [URLQueryItem] = []) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/posts/\\(id)")
@@ -111,12 +115,16 @@ final class SnowdropMacrosTests: XCTestCase {
             }
             
             public class TestEndpointService: Recoverable {
-                private let baseUrl = URL(string: "https://google.com")!
+                private let baseUrl: URL
                 static public let tokenLabel = "SnowdropToken"
             
                 public static var beforeSending: ((URLRequest) -> URLRequest)?
                 public static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
                 public static var onAuthRetry: ((TestEndpointService) async throws -> AccessTokenConvertible)?
+            
+                public init(baseUrl: URL) {
+                    self.baseUrl = baseUrl
+                }
             
                 public func uploadFile(file: UIImage, payloadDescription: PayloadDescription, queryItems: [URLQueryItem] = []) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/file")

@@ -20,7 +20,7 @@ public struct Comment: Codable {
 }
 
 @TokenLabel("TestToken")
-@Service(url: "https://jsonplaceholder.typicode.com")
+@Service
 public protocol TestEndpoint {
 
     @RequiresAccessToken
