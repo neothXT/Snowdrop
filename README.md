@@ -1,14 +1,14 @@
-![alt [version]](https://img.shields.io/github/v/release/neothXT/Netty) ![alt spm available](https://img.shields.io/badge/SPM-available-green) ![alt cocoapods available](https://img.shields.io/badge/CocoaPods-unavailable-red) ![alt carthage unavailable](https://img.shields.io/badge/Carthage-unavailable-red)
+![alt [version]](https://img.shields.io/github/v/release/neothXT/Snowdrop) ![alt spm available](https://img.shields.io/badge/SPM-available-green) ![alt cocoapods available](https://img.shields.io/badge/CocoaPods-unavailable-red) ![alt carthage unavailable](https://img.shields.io/badge/Carthage-unavailable-red)
 
-# Netty
+# Snowdrop
 
-Meet Netty - type-safe, easy to use framework powered by Swift Macros created to let you build and maintain complex network requests with ease.
+Meet Snowdrop - type-safe, easy to use framework powered by Swift Macros created to let you build and maintain complex network requests with ease.
 
 ## Navigation
 
 - [Installation](#installation)
 - [Key Functionalities](#key-functionalities)
-- [Basic Usage](#macro-powered-networking)
+- [Basic Usage](#basic-usage)
     - [Service Declaration](#service-declaration)
     - [Request Execution](#request-execution)
 - [Advanced Usage](#advanced-usage)
@@ -29,7 +29,7 @@ Meet Netty - type-safe, easy to use framework powered by Swift Macros created to
 
 ## Installation
 
-Netty is available via SPM. It works with iOS Deployment Target has to be 14.0 or newer. If you code for macOS, your Deployment Target has to be 11 or newer.
+Snowdrop is available via SPM. It works with iOS Deployment Target has to be 14.0 or newer. If you code for macOS, your Deployment Target has to be 11 or newer.
 
 ## Key Functionalities
 
@@ -53,7 +53,7 @@ Netty is available via SPM. It works with iOS Deployment Target has to be 14.0 o
 
 ### Service Declaration
 
-Creating network services with Netty is really easy. Just declare a protocol along with its functions. 
+Creating network services with Snowdrop is really easy. Just declare a protocol along with its functions. 
 
 ```Swift
 @Service(url: "https://my-endpoint.com")
@@ -64,7 +64,7 @@ protocol MyEndpoint {
 }
 ```
 
-If your request includes some dynamic values, such as `id`, you can add it to your path wrapping it with `{}`. Netty will automatically bind your function declaration's arguments with those you include in request's path.
+If your request includes some dynamic values, such as `id`, you can add it to your path wrapping it with `{}`. Snowdrop will automatically bind your function declaration's arguments with those you include in request's path.
 
 WARNING: You should not name your path variables "queryItems" or "payloadDescription".
 
@@ -75,7 +75,7 @@ func getPost(id: Int) async throws -> Post
 
 ### Request Execution
 
-Upon expanding macros, Netty creates a class `MyEndpointService` which implements `MyEndpoint` protocol and generates all the functions you declared.
+Upon expanding macros, Snowdrop creates a class `MyEndpointService` which implements `MyEndpoint` protocol and generates all the functions you declared.
 
 ```Swift
 class MyEndpointService: MyEndpoint {
@@ -100,29 +100,29 @@ let post = try await getPost(id: 7)
 
 ### Configuration
 
-Netty's config allows you to set/change framework's global settings.
+Snowdrop's config allows you to set/change framework's global settings.
 
 ### Default JSON Decoder
 
-If you need to change default json decoder, you can set your own decoder to `Netty.Config.defaultJSONDecoder`.
+If you need to change default json decoder, you can set your own decoder to `Snowdrop.Config.defaultJSONDecoder`.
 
 #### SSL/Certificate Pinning
 
-By default SSL/Certificate pinning is turned OFF. To enable it, use `Netty.Config.pinningModes`. Possible settings are:
+By default SSL/Certificate pinning is turned OFF. To enable it, use `Snowdrop.Config.pinningModes`. Possible settings are:
 
 ```Swift
-Netty.Config.pinningModes = .ssl
+Snowdrop.Config.pinningModes = .ssl
 // or
-Netty.Config.pinningModes = .certificate
+Snowdrop.Config.pinningModes = .certificate
 // or
-Netty.Config.pinningModes = [.ssl, .certificate]
+Snowdrop.Config.pinningModes = [.ssl, .certificate]
 ```
 
-If you want to exclude some URLs from SSL/Certificate pinning, add them to `Netty.Config.urlsExcludedFromPinning`.
+If you want to exclude some URLs from SSL/Certificate pinning, add them to `Snowdrop.Config.urlsExcludedFromPinning`.
 
 #### Access Token Storage
 
-`Netty.Config.accessTokenStorage` allows you to define your own storage for your access tokens. The default storage saves your tokens in RAM until your app is killed.
+`Snowdrop.Config.accessTokenStorage` allows you to define your own storage for your access tokens. The default storage saves your tokens in RAM until your app is killed.
 
 ### Body Argument
 
@@ -155,7 +155,7 @@ _ = try await service.uploadImage(someImage, payloadDescription: payload)
 
 ### Query Parameters
 
-Upon expanding macros, Netty adds argument `queryItems: [URLQueryItem]` to every service's function. For dynamic query parameters it's recommended to pass them using this argument like:
+Upon expanding macros, Snowdrop adds argument `queryItems: [URLQueryItem]` to every service's function. For dynamic query parameters it's recommended to pass them using this argument like:
 
 ```Swift
 @Service(url: "https://my-endpoint.com")
@@ -181,11 +181,11 @@ WARNING: Do not combine those approaches in one request.
 
 ### Arguments' Default Values
 
-Netty allows you to define custom values for your arguments. Let's say your path includes `{id}` argument. As you already know by now, Netty automatically associates it with `id` argument of your `func` declaration. If you want it to have default value equal "3", do it like: `{id=3}`. Be careful though as Netty won't check if your default value's type conforms to the declaration.  
+Snowdrop allows you to define custom values for your arguments. Let's say your path includes `{id}` argument. As you already know by now, Snowdrop automatically associates it with `id` argument of your `func` declaration. If you want it to have default value equal "3", do it like: `{id=3}`. Be careful though as Snowdrop won't check if your default value's type conforms to the declaration.  
 
 ### Authorization
 
-To let Netty know a request requires access token, use `@RequiresAccessToken` macro like:
+To let Snowdrop know a request requires access token, use `@RequiresAccessToken` macro like:
 
 ```Swift
 @GET(url: "/posts")
@@ -193,7 +193,7 @@ To let Netty know a request requires access token, use `@RequiresAccessToken` ma
 func getAllPosts() async throws -> [Post]
 ```
 
-WARNING: For Netty to be able to work with your access token regardless of its structure, make sure your token model conforms to `AccessTokenConvertible` protocol.
+WARNING: For Snowdrop to be able to work with your access token regardless of its structure, make sure your token model conforms to `AccessTokenConvertible` protocol.
 
 ```Swift
 public protocol AccessTokenConvertible: Codable {
@@ -203,7 +203,7 @@ public protocol AccessTokenConvertible: Codable {
 
 #### Defining Custom Access Token Storage
 
-Netty comes with default access token storage that saves your tokens in RAM until your app is killed but you can also provide your own storage.
+Snowdrop comes with default access token storage that saves your tokens in RAM until your app is killed but you can also provide your own storage.
 When doing so, remember that your storage has to conform to `AccessTokenStorage` protocol.
 
 ```Swift
@@ -214,15 +214,15 @@ public protocol AccessTokenStorage {
 }
 ```
 
-Once your Access Token Storage is ready, assign it by invoking `Netty.Config.setAccessTokenStorage(_ storage: AccessTokenStorage)`.
+Once your Access Token Storage is ready, assign it by invoking `Snowdrop.Config.setAccessTokenStorage(_ storage: AccessTokenStorage)`.
 
 #### Access Token Refresh Automation
 
-Upon expanding macros, for each service Netty adds to it conformance to Recoverable protocol. That means, each service has `onAuthRetry` property which is called whenever request fails due to authentication error (401). You should put your access token refresh logic in it like:
+Upon expanding macros, for each service Snowdrop adds to it conformance to Recoverable protocol. That means, each service has `onAuthRetry` property which is called whenever request fails due to authentication error (401). You should put your access token refresh logic in it like:
 
 ```Swift 
 MyEndpointService.onAuthRetry = { service in
-    if let token = Netty.Config.accessTokenStorage.fetch(for: MyEndpointService.tokenLabel) {
+    if let token = Snowdrop.Config.accessTokenStorage.fetch(for: MyEndpointService.tokenLabel) {
         return try await service.refreshToken(oldToken: token)
     } else {
         return try await service.getToken()
@@ -230,11 +230,11 @@ MyEndpointService.onAuthRetry = { service in
 }
 ```
 
-You can also change which error codes should trigger `onAuthRetry` by setting `Netty.Config.accessTokenErrorCodes` value.
+You can also change which error codes should trigger `onAuthRetry` by setting `Snowdrop.Config.accessTokenErrorCodes` value.
 
 #### Custom Access Token storage key
 
-By default, Netty uses "NettyToken" as an access token storage key for each service. If you want to use some other name, use `@TokenLabel` macro like:
+By default, Snowdrop uses "SnowdropToken" as an access token storage key for each service. If you want to use some other name, use `@TokenLabel` macro like:
 
 ```Swift
 @Service(url: "https://my-endpoint.com")
@@ -264,4 +264,4 @@ Those interceptors are then called for each MyEndpointService function's call.
 
 ## Acknowledgements
 
-Retrofit was an inspiration for Netty.
+Retrofit was an inspiration for Snowdrop.
