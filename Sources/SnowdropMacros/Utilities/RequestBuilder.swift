@@ -14,7 +14,9 @@ class RequestBuilder {
         var requestImpl = """
         
             if !queryItems.isEmpty {
-                url.append(queryItems: queryItems)
+                url.append(queryItems: queryItems.map { 
+                    $0.toUrlQueryItem()
+                })
             }
         
             var request = URLRequest(url: url)

@@ -29,9 +29,8 @@ class FunctionMapper {
         let effectSpecifiers = signature.effectSpecifiers?.description ?? ""
         let returnClause = signature.returnClause?.description ?? ""
         
-        if let bodyParamName = passedArguments.body {
-            body = enrichedParams.first { $0.key == bodyParamName }
-        }
+        let bodyParamName = passedArguments.body ?? "body"
+        body = enrichedParams.first { $0.key == bodyParamName }
         
         guard let returnType = signature.returnClause?.type.description else {
             throw RequestMacroError.badOrMissingReturnType
@@ -53,7 +52,7 @@ class FunctionMapper {
             enrichedParams.append(.init(key: "payloadDescription", type: "PayloadDescription", value: nil))
         }
         
-        enrichedParams.append(.init(key: "queryItems", type: "[URLQueryItem]", value: "[]"))
+        enrichedParams.append(.init(key: "queryItems", type: "[QueryItem]", value: "[]"))
         
         let enrichedParamsString = enrichedParams.map { $0.toString() }.joined(separator: ", ")
         

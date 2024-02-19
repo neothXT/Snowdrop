@@ -43,12 +43,14 @@ final class SnowdropMacrosTests: XCTestCase {
                     self.baseUrl = baseUrl
                 }
 
-                func getPosts(for id: Int = 2, model: Model, queryItems: [URLQueryItem] = []) async throws -> Post {
+                func getPosts(for id: Int = 2, model: Model, queryItems: [QueryItem] = []) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/posts/\\(id)")
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
                     if !queryItems.isEmpty {
-                        url.append(queryItems: queryItems)
+                        url.append(queryItems: queryItems.map {
+                            $0.toUrlQueryItem()
+                        })
                     }
             
                     var request = URLRequest(url: url)
@@ -126,12 +128,14 @@ final class SnowdropMacrosTests: XCTestCase {
                     self.baseUrl = baseUrl
                 }
             
-                public func uploadFile(file: UIImage, payloadDescription: PayloadDescription, queryItems: [URLQueryItem] = []) async throws -> Post {
+                public func uploadFile(file: UIImage, payloadDescription: PayloadDescription, queryItems: [QueryItem] = []) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/file")
                     let headers: [String: Any] = [:]
             
                     if !queryItems.isEmpty {
-                        url.append(queryItems: queryItems)
+                        url.append(queryItems: queryItems.map {
+                            $0.toUrlQueryItem()
+                        })
                     }
             
                     var request = URLRequest(url: url)
