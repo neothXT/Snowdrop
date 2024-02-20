@@ -60,6 +60,7 @@ Creating network services with Snowdrop is really easy. Just declare a protocol 
 protocol MyEndpoint {
 
     @GET(url: "/posts")
+    @Headers(["X-DeviceID": "testSim001"])
     func getAllPosts() async throws -> [Post]
 }
 ```
