@@ -125,7 +125,7 @@ If you want to exclude some URLs from SSL/Certificate pinning, add them to `Snow
 
 ### Body Argument
 
-If you want to put some encodable object as a body of your request, use `@Body` macro like:
+If you want to put some encodable object as a body of your request, you can either put it in your declaration as "body" argument or - if you want to use another name - use `@Body` macro like:
 
 ```Swift
 @POST(url: "/posts")
