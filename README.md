@@ -168,15 +168,6 @@ let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!
 let post = try await service.getPost(id: 7, _queryItems: [.init(key: "author", value: authorName)])
 ```
 
-However, if you want to add static query parameters to your request, you may also include them in your path like:
-
-```Swift
-@GET(url: "/posts/{id}?myStaticParam=value")
-func getPost(id: Int) async throws -> Post
-```
- 
-WARNING: Do not combine those approaches in one request.
-
 ### Arguments' Default Values
 
 Snowdrop allows you to define custom values for your arguments. Let's say your path includes `{id}` argument. As you already know by now, Snowdrop automatically associates it with `id` argument of your `func` declaration. If you want it to have default value equal "3", do it like: `{id=3}`. Be careful though as Snowdrop won't check if your default value's type conforms to the declaration.  
