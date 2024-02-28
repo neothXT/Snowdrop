@@ -12,9 +12,9 @@ class RequestBuilder {
     
     static func build(details: FuncBodyDetails) -> String {
         var requestImpl = """
-        
             if !_queryItems.isEmpty {
-                url.append(queryItems: _queryItems.map {
+                var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+                components.queryItems = _queryItems.map {
                     $0.toUrlQueryItem()
                 })
             }
