@@ -40,6 +40,9 @@ public protocol TestEndpoint {
     ])
     @Body("model")
     func addPost(model: Post) async throws -> Post
+    
+    @POST(url: "/posts")
+    func addPost(body: Post) async throws -> Post
 }
 
 

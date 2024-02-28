@@ -49,10 +49,10 @@ class FunctionMapper {
         )
         
         if passedArguments.isUploadingFile {
-            enrichedParams.append(.init(key: "payloadDescription", type: "PayloadDescription", value: nil))
+            enrichedParams.append(.init(key: "_payloadDescription", type: "PayloadDescription", value: nil))
         }
         
-        enrichedParams.append(.init(key: "queryItems", type: "[QueryItem]", value: "[]"))
+        enrichedParams.append(.init(key: "_queryItems", type: "[QueryItem]", value: "[]"))
         
         let enrichedParamsString = enrichedParams.map { $0.toString() }.joined(separator: ", ")
         

@@ -13,8 +13,8 @@ class RequestBuilder {
     static func build(details: FuncBodyDetails) -> String {
         var requestImpl = """
         
-            if !queryItems.isEmpty {
-                url.append(queryItems: queryItems.map { 
+            if !_queryItems.isEmpty {
+                url.append(queryItems: _queryItems.map {
                     $0.toUrlQueryItem()
                 })
             }
@@ -41,7 +41,7 @@ class RequestBuilder {
                     request.addValue("multipart/form-data", forHTTPHeaderField: "Content-Type")
                 }
             
-                request.httpBody = Snowdrop.Core.dataWithBoundary(\(body), payloadDescription: payloadDescription)\n\n
+                request.httpBody = Snowdrop.Core.dataWithBoundary(\(body), payloadDescription: _payloadDescription)\n\n
             """
         } else if let body = details.body?.key {
             requestImpl += """

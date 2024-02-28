@@ -66,8 +66,6 @@ protocol MyEndpoint {
 
 If your request includes some dynamic values, such as `id`, you can add it to your path wrapping it with `{}`. Snowdrop will automatically bind your function declaration's arguments with those you include in request's path.
 
-WARNING: You should not name your path variables "queryItems" or "payloadDescription".
-
 ```Swift
 @GET(url: "/posts/{id}")
 func getPost(id: Int) async throws -> Post
@@ -136,7 +134,7 @@ func addPost(model: Post) async throws -> Data
 
 ### File Upload
 
-If you want to declare service's function that sends some file to the server as `multipart/form-data`, use `@FileUpload` macro. It'll automatically add `Content-Type: multipart/form-data` to the request's headers and extend the list of your function's arguments with `payloadDescription: PayloadDescription` which you should then use to provide information such as `name`, `fileName` and `mimeType`.
+If you want to declare service's function that sends some file to the server as `multipart/form-data`, use `@FileUpload` macro. It'll automatically add `Content-Type: multipart/form-data` to the request's headers and extend the list of your function's arguments with `_payloadDescription: PayloadDescription` which you should then use to provide information such as `name`, `fileName` and `mimeType`.
 
 ```Swift
 @Service
@@ -150,12 +148,12 @@ protocol MyEndpoint {
 
 let payload = PayloadDescription(name: "avatar", fileName: "filename.jpeg", mimeType: "image/jpeg")
 let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
-_ = try await service.uploadImage(someImage, payloadDescription: payload)
+_ = try await service.uploadImage(someImage, _payloadDescription: payload)
 ```
 
 ### Query Parameters
 
-Upon expanding macros, Snowdrop adds argument `queryItems: [URLQueryItem]` to every service's function. For dynamic query parameters it's recommended to pass them using this argument like:
+Upon expanding macros, Snowdrop adds argument `_queryItems: [QueryItem]` to every service's function. For dynamic query parameters it's recommended to pass them using this argument like:
 
 ```Swift
 @Service
@@ -167,7 +165,7 @@ protocol MyEndpoint {
 
 let authorName = "John Smith"
 let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
-let post = try await service.getPost(id: 7, queryItems: [.init(name: "author", value: authorName)])
+let post = try await service.getPost(id: 7, _queryItems: [.init(key: "author", value: authorName)])
 ```
 
 However, if you want to add static query parameters to your request, you may also include them in your path like:

@@ -103,7 +103,7 @@ public struct FileUploadMacro: PeerMacro {
 
 fileprivate func checkType<T: DeclSyntaxProtocol>(_ type: T.Type, for macroName: String, declaration: DeclSyntaxProtocol) throws -> [DeclSyntax] {
     guard let _ = declaration.as(T.self) else {
-        throw RequestMacroError.badType(macroName: macroName, type: ProtocolDeclSyntax.self is T ? "protocol" : "function")
+        throw RequestMacroError.badType(macroName: macroName, type: ProtocolDeclSyntax.self is T.Type ? "protocol" : "function")
     }
     return []
 }

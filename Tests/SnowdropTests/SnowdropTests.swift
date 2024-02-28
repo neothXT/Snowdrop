@@ -29,7 +29,7 @@ final class SnowdropTests: XCTestCase {
             }
             return request
         }
-        _ = try await service.getPost(id: 12, queryItems: [.init(key: "test", value: true)])
+        _ = try await service.getPost(id: 12, _queryItems: [.init(key: "test", value: true)])
         
         await fulfillment(of: [expectation], timeout: 5)
     }

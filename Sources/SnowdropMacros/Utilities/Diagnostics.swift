@@ -18,11 +18,11 @@ enum ServiceMacroError: Diagnostics, CustomStringConvertible, Error {
     var description: String {
         switch self {
         case .badType:
-            return "@Service can only be applied to a protocol."
+            return "@Service can only be applied to a protocol"
         case .badOrMissingParameter:
-            return "Missing or bad parameter url passed."
+            return "Missing or bad parameter url passed"
         case .syntaxError:
-            return "Unknown syntax error occurred."
+            return "Unknown syntax error occurred"
         }
     }
 }
@@ -36,17 +36,17 @@ enum RequestMacroError: Diagnostics, CustomStringConvertible, Error {
     var description: String {
         switch self {
         case .typeNotRecognized:
-            return "Type couldn't be recognized."
+            return "Type couldn't be recognized"
         case .badType(let macroName, let type):
-            return "@\(macroName) can only be applied to a \(type)."
+            return "@\(macroName) can only be applied to a \(type)"
         case .badOrMissingUrlParameter:
-            return "Bad or missing url parameter passed."
+            return "Bad or missing url parameter passed"
         case .badOrMissingMethodParameter:
-            return "Bad or missing method parameter passed."
+            return "Bad or missing method parameter passed"
         case .badOrMissingReturnType:
-            return "Bad or missing return type."
+            return "Bad or missing return type"
         case .syntaxError:
-            return "Unknown syntax error occurred."
+            return "Unknown syntax error occurred"
         }
     }
 }

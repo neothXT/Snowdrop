@@ -43,12 +43,12 @@ final class SnowdropMacrosTests: XCTestCase {
                     self.baseUrl = baseUrl
                 }
 
-                func getPosts(for id: Int = 2, model: Model, queryItems: [QueryItem] = []) async throws -> Post {
+                func getPosts(for id: Int = 2, model: Model, _queryItems: [QueryItem] = []) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/posts/\\(id)")
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
-                    if !queryItems.isEmpty {
-                        url.append(queryItems: queryItems.map {
+                    if !_queryItems.isEmpty {
+                        url.append(queryItems: _queryItems.map {
                             $0.toUrlQueryItem()
                         })
                     }
@@ -128,12 +128,12 @@ final class SnowdropMacrosTests: XCTestCase {
                     self.baseUrl = baseUrl
                 }
             
-                public func uploadFile(file: UIImage, payloadDescription: PayloadDescription, queryItems: [QueryItem] = []) async throws -> Post {
+                public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription, _queryItems: [QueryItem] = []) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/file")
                     let headers: [String: Any] = [:]
             
-                    if !queryItems.isEmpty {
-                        url.append(queryItems: queryItems.map {
+                    if !_queryItems.isEmpty {
+                        url.append(queryItems: _queryItems.map {
                             $0.toUrlQueryItem()
                         })
                     }
@@ -150,7 +150,7 @@ final class SnowdropMacrosTests: XCTestCase {
                         request.addValue("multipart/form-data", forHTTPHeaderField: "Content-Type")
                     }
             
-                    request.httpBody = Snowdrop.Core.dataWithBoundary(file, payloadDescription: payloadDescription)
+                    request.httpBody = Snowdrop.Core.dataWithBoundary(file, payloadDescription: _payloadDescription)
             
                     request = TestEndpointService.beforeSending?(request) ?? request
                     let session = Snowdrop.Config.getSession()
