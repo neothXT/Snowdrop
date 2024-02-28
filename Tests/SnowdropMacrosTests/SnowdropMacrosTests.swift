@@ -48,9 +48,11 @@ final class SnowdropMacrosTests: XCTestCase {
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
                     if !_queryItems.isEmpty {
-                        url.append(queryItems: _queryItems.map {
+                        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+                        components.queryItems = _queryItems.map {
                             $0.toUrlQueryItem()
-                        })
+                        }
+                        url = components.url!
                     }
             
                     var request = URLRequest(url: url)
@@ -133,9 +135,11 @@ final class SnowdropMacrosTests: XCTestCase {
                     let headers: [String: Any] = [:]
             
                     if !_queryItems.isEmpty {
-                        url.append(queryItems: _queryItems.map {
+                        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+                        components.queryItems = _queryItems.map {
                             $0.toUrlQueryItem()
-                        })
+                        }
+                        url = components.url!
                     }
             
                     var request = URLRequest(url: url)
