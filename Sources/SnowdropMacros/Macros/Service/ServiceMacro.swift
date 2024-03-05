@@ -21,7 +21,7 @@ public struct ServiceMacro: PeerMacro {
         let access = decl.modifiers.first?.name.text ?? ""
         
         let name = decl.name.text + "Service"
-        let tokenLabel = passedArguments.tokenLabel ?? "SnowdropToken"
+        let tokenLabel = passedArguments.tokenLabel ?? "\(decl.name.text)ServiceToken"
         let accessModifier = access == "" ? "" : "\(access) "
         
         let functions: String = decl.memberBlock.members.compactMap { member -> String? in

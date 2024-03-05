@@ -224,7 +224,7 @@ You can also change which error codes should trigger `onAuthRetry` by setting `S
 
 #### Custom Access Token storage key
 
-By default, Snowdrop uses "SnowdropToken" as an access token storage key for each service. If you want to use some other name, use `@TokenLabel` macro like:
+By default, Snowdrop uses your service's name and adds "Token" to it as an access token storage key for each service. For example, if your service is named "MyEndpointService", its token, by default, will be named "MyEndpointServiceToken". If you want to use some other name, use `@TokenLabel` macro like:
 
 ```Swift
 @Service
@@ -234,7 +234,7 @@ protocol MyEndpoint {
 }
 ```
 
-### Interceptions
+### Interceptors
 
 Each service provides two static interceptors - `beforeSending` and `onResponse`. You should use them like:
 

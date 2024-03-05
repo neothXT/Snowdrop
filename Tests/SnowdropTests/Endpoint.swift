@@ -27,9 +27,6 @@ public protocol TestEndpoint {
     @GET(url: "/posts/{id=2}")
     func getPost(id: Int) async throws -> Post
     
-    @GET(url: "posts/{id}?test1=true")
-    func getPostWithStaticQuery(id: Int) async throws -> Post
-    
     @GET(url: "/posts/{id}/comments")
     func getComments(id: Int) async throws -> [Comment]
     
