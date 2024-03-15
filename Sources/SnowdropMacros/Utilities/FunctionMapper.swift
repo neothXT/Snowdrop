@@ -36,6 +36,10 @@ class FunctionMapper {
             throw RequestMacroError.badOrMissingReturnType
         }
         
+        guard effectSpecifiers.contains("throws") || returnType.contains("?") else {
+            throw RequestMacroError.missingOptional
+        }
+        
         // TODO: Add mapping for other passedArguments
         let bodyDetails = RequestBuilder.FuncBodyDetails(
             url: escape(url),
@@ -45,7 +49,8 @@ class FunctionMapper {
             returnType: returnType,
             requiresAccessToken: passedArguments.requiresAccessToken,
             isUploadingFile: passedArguments.isUploadingFile,
-            serviceName: serviceName
+            serviceName: serviceName,
+            doesThrow: effectSpecifiers.contains("throws")
         )
         
         if passedArguments.isUploadingFile {

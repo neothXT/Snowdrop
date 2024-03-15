@@ -80,10 +80,10 @@ final class SnowdropMacrosTests: XCTestCase {
                     let session = Snowdrop.Config.getSession()
             
                     return try await Snowdrop.Core.sendRequest(session: session,
-                                                            request: request,
-                                                            requiresAccessToken: true,
-                                                            tokenLabel: TestEndpointService.tokenLabel,
-                                                            onResponse: TestEndpointService.onResponse) {
+                                                               request: request,
+                                                               requiresAccessToken: true,
+                                                               tokenLabel: TestEndpointService.tokenLabel,
+                                                               onResponse: TestEndpointService.onResponse) {
                         try await TestEndpointService.onAuthRetry?(self)
                     }
                 }
@@ -120,7 +120,7 @@ final class SnowdropMacrosTests: XCTestCase {
             
             public class TestEndpointService: Recoverable {
                 private let baseUrl: URL
-                static public let tokenLabel = "SnowdropToken"
+                static public let tokenLabel = "TestEndpointServiceToken"
             
                 public static var beforeSending: ((URLRequest) -> URLRequest)?
                 public static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
@@ -160,10 +160,10 @@ final class SnowdropMacrosTests: XCTestCase {
                     let session = Snowdrop.Config.getSession()
             
                     return try await Snowdrop.Core.sendRequest(session: session,
-                                                            request: request,
-                                                            requiresAccessToken: false,
-                                                            tokenLabel: TestEndpointService.tokenLabel,
-                                                            onResponse: TestEndpointService.onResponse) {
+                                                               request: request,
+                                                               requiresAccessToken: false,
+                                                               tokenLabel: TestEndpointService.tokenLabel,
+                                                               onResponse: TestEndpointService.onResponse) {
                         try await TestEndpointService.onAuthRetry?(self)
                     }
                 }

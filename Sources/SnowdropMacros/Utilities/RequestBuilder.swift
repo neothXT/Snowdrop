@@ -63,11 +63,11 @@ class RequestBuilder {
             request = \(details.serviceName).beforeSending?(request) ?? request
             let session = Snowdrop.Config.getSession()
         
-            return try await Snowdrop.Core.sendRequest(session: session,
-                                                    request: request,
-                                                    requiresAccessToken: \(details.requiresAccessToken), 
-                                                    tokenLabel: \(details.serviceName).tokenLabel, 
-                                                    onResponse: \(details.serviceName).onResponse) {
+            return try\(details.doesThrow ? "" : "?") await Snowdrop.Core.sendRequest(session: session,
+                                                       request: request,
+                                                       requiresAccessToken: \(details.requiresAccessToken),
+                                                       tokenLabel: \(details.serviceName).tokenLabel,
+                                                       onResponse: \(details.serviceName).onResponse) {
                 try await \(details.serviceName).onAuthRetry?(self)
             }
         """
@@ -86,5 +86,6 @@ extension RequestBuilder {
         let requiresAccessToken: Bool
         let isUploadingFile: Bool
         let serviceName: String
+        let doesThrow: Bool
     }
 }

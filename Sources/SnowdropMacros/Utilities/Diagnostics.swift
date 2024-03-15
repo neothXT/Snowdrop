@@ -29,7 +29,7 @@ enum ServiceMacroError: Diagnostics, CustomStringConvertible, Error {
 
 enum RequestMacroError: Diagnostics, CustomStringConvertible, Error {
     case typeNotRecognized, badType(macroName: String, type: String = "function"), 
-         badOrMissingUrlParameter, badOrMissingMethodParameter, syntaxError, badOrMissingReturnType
+         badOrMissingUrlParameter, badOrMissingMethodParameter, syntaxError, badOrMissingReturnType, missingOptional
     
     var domain: String { "network request" }
     
@@ -45,6 +45,8 @@ enum RequestMacroError: Diagnostics, CustomStringConvertible, Error {
             return "Bad or missing method parameter passed"
         case .badOrMissingReturnType:
             return "Bad or missing return type"
+        case .missingOptional:
+            return "Functions that don't throw require return type to be optional"
         case .syntaxError:
             return "Unknown syntax error occurred"
         }

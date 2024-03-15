@@ -59,4 +59,9 @@ final class SnowdropTests: XCTestCase {
         
         await fulfillment(of: [expectation], timeout: 5)
     }
+    
+    func testNonThrowingPosts() async throws {
+        let result = await service.getNonThrowingPosts()
+        XCTAssert(result != nil)
+    }
 }
