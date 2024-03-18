@@ -24,7 +24,7 @@ Meet Snowdrop - type-safe, easy to use framework powered by Swift Macros created
         - [Defining Custom Access Token Storage](#defining-custom-access-token-storage)
         - [Access Token Refresh Automation](#access-token-refresh-automation)
         - [Custom Access Token storage key](#custom-access-token-storage-key)
-    - [Interceptions](#interceptions)
+    - [Interceptors](#interceptors)
 - [Acknowledgements](#acknowledgements)
 
 ## Installation
