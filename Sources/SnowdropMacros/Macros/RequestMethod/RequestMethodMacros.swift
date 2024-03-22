@@ -71,18 +71,6 @@ public struct TraceMacro: PeerMacro {
     }
 }
 
-public struct RequiresAccessTokenMacro: PeerMacro {
-    public static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
-        try checkType(FunctionDeclSyntax.self, for: "RequiresAccessToken", declaration: declaration)
-    }
-}
-
-public struct TokenLabelMacro: PeerMacro {
-    public static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
-        try checkType(ProtocolDeclSyntax.self, for: "TokenLabel", declaration: declaration)
-    }
-}
-
 public struct HeadersMacro: PeerMacro {
     public static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
         try checkType(FunctionDeclSyntax.self, for: "Headers", declaration: declaration)

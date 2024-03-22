@@ -13,12 +13,6 @@ public macro Service() = #externalMacro(module: "SnowdropMacros", type: "Service
 
 // MARK: - Modifier macros
 @attached(peer)
-public macro TokenLabel(_: String) = #externalMacro(module: "SnowdropMacros", type: "TokenLabelMacro")
-
-@attached(peer)
-public macro RequiresAccessToken() = #externalMacro(module: "SnowdropMacros", type: "RequiresAccessTokenMacro")
-
-@attached(peer)
 public macro Body(_: String) = #externalMacro(module: "SnowdropMacros", type: "BodyMacro")
 
 @attached(peer)
@@ -29,7 +23,7 @@ public macro FileUpload() = #externalMacro(module: "SnowdropMacros", type: "File
 
 
 // MARK: - RequestMethod macros
-@attached(peer, names: arbitrary)
+@attached(peer)
 public macro GET(url: String) = #externalMacro(module: "SnowdropMacros", type: "GetMacro")
 
 @attached(peer)

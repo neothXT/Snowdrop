@@ -32,11 +32,9 @@ class FunctionMapper {
         let bodyParamName = passedArguments.body ?? "body"
         body = enrichedParams.first { $0.key == bodyParamName }
         
-        guard let returnType = signature.returnClause?.type.description else {
-            throw RequestMacroError.badOrMissingReturnType
-        }
+        let returnType = signature.returnClause?.type.description
         
-        guard effectSpecifiers.contains("throws") || returnType.contains("?") else {
+        guard effectSpecifiers.contains("throws") || (returnType?.contains("?") ?? true) else {
             throw RequestMacroError.missingOptional
         }
         
@@ -47,7 +45,6 @@ class FunctionMapper {
             headers: passedArguments.headers ?? "[:]",
             body: body,
             returnType: returnType,
-            requiresAccessToken: passedArguments.requiresAccessToken,
             isUploadingFile: passedArguments.isUploadingFile,
             serviceName: serviceName,
             doesThrow: effectSpecifiers.contains("throws")

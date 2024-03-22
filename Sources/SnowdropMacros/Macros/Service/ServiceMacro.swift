@@ -13,15 +13,13 @@ import Foundation
 
 public struct ServiceMacro: PeerMacro {
     public static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
-        guard let decl = declaration.as(ProtocolDeclSyntax.self),
-              let passedArguments = decl.getPassedArguments() else {
+        guard let decl = declaration.as(ProtocolDeclSyntax.self) else {
             throw ServiceMacroError.badType
         }
         
         let access = decl.modifiers.first?.name.text ?? ""
         
         let name = decl.name.text + "Service"
-        let tokenLabel = passedArguments.tokenLabel ?? "\(decl.name.text)ServiceToken"
         let accessModifier = access == "" ? "" : "\(access) "
         
         let functions: String = decl.memberBlock.members.compactMap { member -> String? in
@@ -36,13 +34,11 @@ public struct ServiceMacro: PeerMacro {
         }.joined(separator: "\n\n")
         
         return ["""
-        \(raw: accessModifier)class \(raw: name): Recoverable {
+        \(raw: accessModifier)class \(raw: name) {
             private let baseUrl: URL
-            static public let tokenLabel = "\(raw: tokenLabel)"
         
             \(raw: accessModifier)static var beforeSending: ((URLRequest) -> URLRequest)?
             \(raw: accessModifier)static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
-            \(raw: accessModifier)static var onAuthRetry: ((\(raw: name)) async throws -> AccessTokenConvertible)?
         
             \(raw: accessModifier)init(baseUrl: URL) {
                 self.baseUrl = baseUrl

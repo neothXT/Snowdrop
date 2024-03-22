@@ -62,14 +62,12 @@ public extension Snowdrop {
             return data
         }
         
-        public static func sendRequest<T: Codable>(
+        @discardableResult
+        public static func performRequest(
             session: URLSession,
             request: URLRequest,
-            requiresAccessToken: Bool,
-            tokenLabel: String?,
-            onResponse: ((Data?, HTTPURLResponse) -> Data?)?,
-            onAuthFailed: @escaping () async throws -> AccessTokenConvertible?
-        ) async throws -> T {
+            onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+        ) async throws -> (Data?, HTTPURLResponse) {
             var data: Data?
             var urlResponse: URLResponse?
             
@@ -84,22 +82,34 @@ public extension Snowdrop {
                 let error = error as NSError
                 let errorType: SnowdropError.ErrorType = networkErrorCodes.contains(error.code) ? .noInternetConnection : .unexpectedResponse
                 let errorDetails = SnowdropErrorDetails(statusCode: error.code,
-                                                     localizedString: error.localizedDescription)
+                                                        localizedString: error.localizedDescription)
                 let SnowdropError = SnowdropError(type: errorType, details: errorDetails)
                 throw SnowdropError
             }
-            
-            
             
             guard let response = urlResponse as? HTTPURLResponse else {
                 throw SnowdropError(type: .failedToMapResponse)
             }
             
+            return (data, response)
+        }
+        
+        public static func performRequestAndDecode<T: Codable>(
+            session: URLSession,
+            request: URLRequest,
+            onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+        ) async throws -> T {
+            let (data, response) = try await performRequest(session: session, request: request, onResponse: onResponse)
             let finalData = onResponse?(data, response) ?? data
             
-            guard [200, 201, 204].contains(response.statusCode) else {
+            if let castedData = finalData as? T {
+                return castedData
+            }
+            
+            guard let unwrappedData = finalData,
+                    let decodedData = try? Snowdrop.Config.defaultJSONDecoder.decode(T.self, from: unwrappedData) else {
                 throw SnowdropError(
-                    type: .unexpectedResponse,
+                    type: .failedToMapResponse,
                     details: .init(
                         statusCode: response.statusCode,
                         localizedString: HTTPURLResponse.localizedString(forStatusCode: response.statusCode),
@@ -108,44 +118,6 @@ public extension Snowdrop {
                         headers: response.allHeaderFields),
                     data: finalData
                 )
-            }
-            
-            if Snowdrop.Config.accessTokenErrorCodes.contains(response.statusCode) && requiresAccessToken, let tokenLabel {
-                let convertibleToken: AccessTokenConvertible? = try await onAuthFailed()
-                
-                let identifier = request.url!.absoluteString
-                
-                if !didRetry.contains(identifier), let token = convertibleToken?.convert() {
-                    didRetry.append(identifier)
-                    Snowdrop.Config.accessTokenStorage.store(token, for: tokenLabel)
-                    
-                    return try await sendRequest(session: session,
-                                                 request: request,
-                                                 requiresAccessToken: requiresAccessToken,
-                                                 tokenLabel: tokenLabel,
-                                                 onResponse: onResponse,
-                                                 onAuthFailed: onAuthFailed)
-                } else {
-                    throw SnowdropError(
-                        type: .authenticationFailed,
-                        details: .init(
-                            statusCode: response.statusCode,
-                            localizedString: HTTPURLResponse.localizedString(forStatusCode: response.statusCode),
-                            url: response.url,
-                            mimeType: response.mimeType,
-                            headers: response.allHeaderFields),
-                        data: nil
-                    )
-                }
-            }
-            
-            if let castedData = finalData as? T {
-                return castedData
-            }
-            
-            guard let unwrappedData = finalData,
-                    let decodedData = try? Snowdrop.Config.defaultJSONDecoder.decode(T.self, from: unwrappedData) else {
-                throw SnowdropError(type: .failedToMapResponse)
             }
             
             return decodedData

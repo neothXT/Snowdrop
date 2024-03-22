@@ -22,8 +22,6 @@ struct SnowdropMacrosPlugin: CompilerPlugin {
         QueryMacro.self,
         TraceMacro.self,
         ServiceMacro.self,
-        RequiresAccessTokenMacro.self,
-        TokenLabelMacro.self,
         HeadersMacro.self,
         BodyMacro.self,
         FileUploadMacro.self

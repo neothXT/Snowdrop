@@ -15,15 +15,10 @@ Meet Snowdrop - type-safe, easy to use framework powered by Swift Macros created
     - [Configuration](#configuration)
         - [Default JSON Decoder](#default-json-decoder)
         - [SSL/Certificate Pinning](#sslcertificate-pinning)
-        - [Access Token Storage](#access-token-storage)
     - [Body Argument](#body-argument)
     - [File Upload](#file-upload)
     - [Query Parameters](#query-parameters)
     - [Arguments' Default Values](#arguments-default-values)
-    - [Authorization](#authorization)
-        - [Defining Custom Access Token Storage](#defining-custom-access-token-storage)
-        - [Access Token Refresh Automation](#access-token-refresh-automation)
-        - [Custom Access Token storage key](#custom-access-token-storage-key)
     - [Interceptors](#interceptors)
 - [Acknowledgements](#acknowledgements)
 
@@ -45,9 +40,8 @@ Snowdrop is available via SPM. It works with iOS Deployment Target has to be 14.
     - `@OPTIONS`
     - `@QUERY`
     - `@TRACE`
-- SSL and Certificate pinning
-- WebSocket connection support
-- Automated Access Token refresh with `Recoverable` protocol
+- SSL/Certificate pinning
+- Interceptors
 
 ## Basic Usage
 
@@ -107,21 +101,8 @@ If you need to change default json decoder, you can set your own decoder to `Sno
 
 #### SSL/Certificate Pinning
 
-By default SSL/Certificate pinning is turned OFF. To enable it, use `Snowdrop.Config.pinningModes`. Possible settings are:
-
-```Swift
-Snowdrop.Config.pinningModes = .ssl
-// or
-Snowdrop.Config.pinningModes = .certificate
-// or
-Snowdrop.Config.pinningModes = [.ssl, .certificate]
-```
-
-If you want to exclude some URLs from SSL/Certificate pinning, add them to `Snowdrop.Config.urlsExcludedFromPinning`.
-
-#### Access Token Storage
-
-`Snowdrop.Config.accessTokenStorage` allows you to define your own storage for your access tokens. The default storage saves your tokens in RAM until your app is killed.
+To enable SSL/Certificate Pinning all you need to do is to include your certificate in the project.
+Then, if you want to exclude some URLs from SSL/Certificate pinning, add them to `Snowdrop.Config.urlsExcludedFromPinning`.
 
 ### Body Argument
 
@@ -172,67 +153,6 @@ let post = try await service.getPost(id: 7, _queryItems: [.init(key: "author", v
 ### Arguments' Default Values
 
 Snowdrop allows you to define custom values for your arguments. Let's say your path includes `{id}` argument. As you already know by now, Snowdrop automatically associates it with `id` argument of your `func` declaration. If you want it to have default value equal "3", do it like: `{id=3}`. Be careful though as Snowdrop won't check if your default value's type conforms to the declaration.  
-
-### Authorization
-
-To let Snowdrop know a request requires access token, use `@RequiresAccessToken` macro like:
-
-```Swift
-@GET(url: "/posts")
-@RequiresAccessToken
-func getAllPosts() async throws -> [Post]
-```
-
-WARNING: For Snowdrop to be able to work with your access token regardless of its structure, make sure your token model conforms to `AccessTokenConvertible` protocol.
-
-```Swift
-public protocol AccessTokenConvertible: Codable {
-    func convert() -> AccessToken?
-}
-```
-
-#### Defining Custom Access Token Storage
-
-Snowdrop comes with default access token storage that saves your tokens in RAM until your app is killed but you can also provide your own storage.
-When doing so, remember that your storage has to conform to `AccessTokenStorage` protocol.
-
-```Swift
-public protocol AccessTokenStorage {
-    func store(_ token: AccessToken?, for storingLabel: String)
-    func fetch(for storingLabel: String) -> AccessToken?
-    func delete(for storingLabel: String) -> Bool
-}
-```
-
-Once your Access Token Storage is ready, assign it by invoking `Snowdrop.Config.setAccessTokenStorage(_ storage: AccessTokenStorage)`.
-
-#### Access Token Refresh Automation
-
-Upon expanding macros, for each service Snowdrop adds to it conformance to Recoverable protocol. That means, each service has `onAuthRetry` property which is called whenever request fails due to authentication error (401). You should put your access token refresh logic in it like:
-
-```Swift 
-MyEndpointService.onAuthRetry = { service in
-    if let token = Snowdrop.Config.accessTokenStorage.fetch(for: MyEndpointService.tokenLabel) {
-        return try await service.refreshToken(oldToken: token)
-    } else {
-        return try await service.getToken()
-    }
-}
-```
-
-You can also change which error codes should trigger `onAuthRetry` by setting `Snowdrop.Config.accessTokenErrorCodes` value.
-
-#### Custom Access Token storage key
-
-By default, Snowdrop uses your service's name and adds "Token" to it as an access token storage key for each service. For example, if your service is named "MyEndpointService", its token, by default, will be named "MyEndpointServiceToken". If you want to use some other name, use `@TokenLabel` macro like:
-
-```Swift
-@Service
-@TokenLabel("My label")
-protocol MyEndpoint {
-    // function declarations
-}
-```
 
 ### Interceptors
 

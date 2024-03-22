@@ -16,9 +16,7 @@ extension AttributeSyntax {
     struct PassedArgumentList {
         var url: String?
         var body: String?
-        var tokenLabel: String?
         var headers: String?
-        var requiresAccessToken: Bool = false
         var urlParams: [URLParam] = []
         var isUploadingFile: Bool = false
         
@@ -26,9 +24,7 @@ extension AttributeSyntax {
             .init(
                 url: self.url ?? argumentsList.url,
                 body: self.body ?? argumentsList.body,
-                tokenLabel: self.tokenLabel ?? argumentsList.tokenLabel,
                 headers: self.headers ?? argumentsList.headers,
-                requiresAccessToken: self.requiresAccessToken || argumentsList.requiresAccessToken,
                 urlParams: self.urlParams + argumentsList.urlParams,
                 isUploadingFile: self.isUploadingFile || argumentsList.isUploadingFile
             )
@@ -39,7 +35,6 @@ extension AttributeSyntax {
 extension AttributeSyntax {
     var passedArguments: PassedArgumentList {
         var argumentsList = PassedArgumentList()
-        argumentsList.requiresAccessToken = attributeName.description.lowercased() == ArgumentType.requiresaccesstoken.rawValue
         argumentsList.isUploadingFile = attributeName.description.lowercased() == ArgumentType.fileupload.rawValue
         arguments?.as(LabeledExprListSyntax.self)?.forEach { argument in
             let key = ArgumentType(rawValue: (argument.name ?? attributeName.description).lowercased()) ?? .unknown
@@ -50,8 +45,6 @@ extension AttributeSyntax {
                 argumentsList.urlParams = urlParams(for: argument.asString())
             case .body:
                 argumentsList.body = argument.asString()
-            case .tokenlabel:
-                argumentsList.tokenLabel = argument.asString()
             case .headers:
                 argumentsList.headers = argument.asString()
             default:

@@ -30,13 +30,6 @@ class RequestBuilder {
             }\n\n
         """
         
-        if details.requiresAccessToken {
-            requestImpl += """
-                let token = Snowdrop.Config.accessTokenStorage.fetch(for: \(details.serviceName).tokenLabel)?.access_token
-                request.addValue("Bearer \\(token ?? "")", forHTTPHeaderField: "Authorization")\n\n
-            """
-        }
-        
         if details.isUploadingFile, let body = details.body?.key {
             requestImpl += """
                 if (headers["Content-Type"] as? String) == nil {
@@ -61,16 +54,22 @@ class RequestBuilder {
         
         requestImpl += """
             request = \(details.serviceName).beforeSending?(request) ?? request
-            let session = Snowdrop.Config.getSession()
-        
-            return try\(details.doesThrow ? "" : "?") await Snowdrop.Core.sendRequest(session: session,
-                                                       request: request,
-                                                       requiresAccessToken: \(details.requiresAccessToken),
-                                                       tokenLabel: \(details.serviceName).tokenLabel,
-                                                       onResponse: \(details.serviceName).onResponse) {
-                try await \(details.serviceName).onAuthRetry?(self)
-            }
+            let session = Snowdrop.Config.getSession()\n\n
         """
+        
+        if let _ = details.returnType {
+            requestImpl += """
+                return try\(details.doesThrow ? "" : "?") await Snowdrop.Core.performRequestAndDecode(session: session,
+                                                                        request: request,
+                                                                        onResponse: \(details.serviceName).onResponse)
+            """
+        } else {
+            requestImpl += """
+                _ = try\(details.doesThrow ? "" : "?") await Snowdrop.Core.performRequest(session: session,
+                                                            request: request,
+                                                            onResponse: \(details.serviceName).onResponse)
+            """
+        }
         
         return requestImpl
     }
@@ -82,8 +81,7 @@ extension RequestBuilder {
         let method: String
         let headers: String
         let body: EnrichedParameter?
-        let returnType: String
-        let requiresAccessToken: Bool
+        let returnType: String?
         let isUploadingFile: Bool
         let serviceName: String
         let doesThrow: Bool

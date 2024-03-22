@@ -19,18 +19,15 @@ public struct Comment: Codable {
     let name, email, body: String
 }
 
-@TokenLabel("TestToken")
 @Service
 public protocol TestEndpoint {
 
-    @RequiresAccessToken
     @GET(url: "/posts/{id=2}")
     func getPost(id: Int) async throws -> Post
     
     @GET(url: "/posts/{id}/comments")
     func getComments(id: Int) async throws -> [Comment]
     
-    @RequiresAccessToken
     @POST(url: "/posts")
     @Headers([
         "Content-Type": "application/json",
@@ -43,6 +40,9 @@ public protocol TestEndpoint {
     
     @GET(url: "/posts/")
     func getNonThrowingPosts() async -> [Post]?
+    
+    @GET(url: "posts")
+    func getNoResponsePosts() async
 }
 
 

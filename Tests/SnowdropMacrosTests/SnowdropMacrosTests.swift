@@ -15,10 +15,8 @@ final class SnowdropMacrosTests: XCTestCase {
         assertMacroExpansion(
             """
             @Service
-            @TokenLabel("TestToken")
             protocol TestEndpoint {
                 @GET(url: "/posts/{id=2}")
-                @RequiresAccessToken
                 @Headers(["Content-Type": "application/json"])
                 @Body("model")
                 func getPosts(for id: Int, model: Model) async throws -> Post
@@ -31,13 +29,11 @@ final class SnowdropMacrosTests: XCTestCase {
                 func getPosts(for id: Int, model: Model) async throws -> Post
             }
             
-            class TestEndpointService: Recoverable {
+            class TestEndpointService {
                 private let baseUrl: URL
-                static public let tokenLabel = "TestToken"
             
                 static var beforeSending: ((URLRequest) -> URLRequest)?
                 static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
-                static var onAuthRetry: ((TestEndpointService) async throws -> AccessTokenConvertible)?
             
                 init(baseUrl: URL) {
                     self.baseUrl = baseUrl
@@ -63,9 +59,6 @@ final class SnowdropMacrosTests: XCTestCase {
                         request.addValue("\\(value)", forHTTPHeaderField: key)
                     }
             
-                    let token = Snowdrop.Config.accessTokenStorage.fetch(for: TestEndpointService.tokenLabel)?.access_token
-                    request.addValue("Bearer \\(token ?? "")", forHTTPHeaderField: "Authorization")
-            
                     var data: Data?
             
                     if let header = headers["Content-Type"] as? String, header == "application/x-www-form-urlencoded" {
@@ -79,21 +72,15 @@ final class SnowdropMacrosTests: XCTestCase {
                     request = TestEndpointService.beforeSending?(request) ?? request
                     let session = Snowdrop.Config.getSession()
             
-                    return try await Snowdrop.Core.sendRequest(session: session,
-                                                               request: request,
-                                                               requiresAccessToken: true,
-                                                               tokenLabel: TestEndpointService.tokenLabel,
-                                                               onResponse: TestEndpointService.onResponse) {
-                        try await TestEndpointService.onAuthRetry?(self)
-                    }
+                    return try await Snowdrop.Core.performRequestAndDecode(session: session,
+                                                                            request: request,
+                                                                            onResponse: TestEndpointService.onResponse)
                 }
             }
             """,
             macros: [
-                "Service": ServiceMacro.self, 
-                "TokenLabel": TokenLabelMacro.self,
+                "Service": ServiceMacro.self,
                 "GET": GetMacro.self,
-                "RequiresAccessToken": RequiresAccessTokenMacro.self,
                 "Headers": HeadersMacro.self,
                 "Body": BodyMacro.self
             ]
@@ -118,13 +105,11 @@ final class SnowdropMacrosTests: XCTestCase {
                 func uploadFile(file: UIImage) async throws -> Post
             }
             
-            public class TestEndpointService: Recoverable {
+            public class TestEndpointService {
                 private let baseUrl: URL
-                static public let tokenLabel = "TestEndpointServiceToken"
             
                 public static var beforeSending: ((URLRequest) -> URLRequest)?
                 public static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
-                public static var onAuthRetry: ((TestEndpointService) async throws -> AccessTokenConvertible)?
             
                 public init(baseUrl: URL) {
                     self.baseUrl = baseUrl
@@ -159,13 +144,9 @@ final class SnowdropMacrosTests: XCTestCase {
                     request = TestEndpointService.beforeSending?(request) ?? request
                     let session = Snowdrop.Config.getSession()
             
-                    return try await Snowdrop.Core.sendRequest(session: session,
-                                                               request: request,
-                                                               requiresAccessToken: false,
-                                                               tokenLabel: TestEndpointService.tokenLabel,
-                                                               onResponse: TestEndpointService.onResponse) {
-                        try await TestEndpointService.onAuthRetry?(self)
-                    }
+                    return try await Snowdrop.Core.performRequestAndDecode(session: session,
+                                                                            request: request,
+                                                                            onResponse: TestEndpointService.onResponse)
                 }
             }
             """,
