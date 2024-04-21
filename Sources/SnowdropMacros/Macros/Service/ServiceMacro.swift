@@ -34,13 +34,13 @@ public struct ServiceMacro: PeerMacro {
         }.joined(separator: "\n\n")
         
         return ["""
-        \(raw: accessModifier)class \(raw: name) {
-            private let baseUrl: URL
+        \(raw: accessModifier)class \(raw: name): \(raw: decl.name.text), Service {
+            \(raw: accessModifier)let baseUrl: URL
         
             \(raw: accessModifier)static var beforeSending: ((URLRequest) -> URLRequest)?
             \(raw: accessModifier)static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
         
-            \(raw: accessModifier)init(baseUrl: URL) {
+            \(raw: accessModifier)required init(baseUrl: URL) {
                 self.baseUrl = baseUrl
             }
         

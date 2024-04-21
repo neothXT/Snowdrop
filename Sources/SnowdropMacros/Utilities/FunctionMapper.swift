@@ -23,7 +23,7 @@ class FunctionMapper {
         
         let signature = decl.signature
         let params = signature.parameterClause.parameters
-        var enrichedParams = params.asEnrichedStringParams(defaultValues: passedArguments.urlParams)
+        let enrichedParams = params.asEnrichedStringParams(defaultValues: passedArguments.urlParams)
         var body: EnrichedParameter?
         let funcName = decl.name.text
         let effectSpecifiers = signature.effectSpecifiers?.description ?? ""
@@ -50,18 +50,28 @@ class FunctionMapper {
             doesThrow: effectSpecifiers.contains("throws")
         )
         
+        var extendedEnrichedParams = enrichedParams
+        
         if passedArguments.isUploadingFile {
-            enrichedParams.append(.init(key: "_payloadDescription", type: "PayloadDescription", value: nil))
+            extendedEnrichedParams.append(.init(key: "_payloadDescription", type: "PayloadDescription?", value: nil))
         }
         
-        enrichedParams.append(.init(key: "_queryItems", type: "[QueryItem]", value: "[]"))
+        extendedEnrichedParams.append(.init(key: "_queryItems", type: "[QueryItem]", value: nil))
         
         let enrichedParamsString = enrichedParams.map { $0.toString() }.joined(separator: ", ")
+        let extendedEnrichedParamsString = extendedEnrichedParams.map { $0.toString() }.joined(separator: ", ")
+        let executableEnrichedParamsString = extendedEnrichedParams.map { $0.toExecutableString() }.joined(separator: ", ")
         
         let funcBody = generateBody(details: bodyDetails)
+        let shortBody = RequestBuilder.buildShort(details: bodyDetails)
         
         return """
-        \(accessModifier)func \(funcName)(\(enrichedParamsString))\(effectSpecifiers)\(returnClause)\(funcBody)
+        \(accessModifier)func \(funcName)(\(enrichedParamsString))\(effectSpecifiers)\(returnClause) {
+            \(shortBody)
+            return \(bodyDetails.doesThrow ? "try await" : "await") \(funcName)(\(executableEnrichedParamsString))
+        }
+        
+        \(accessModifier)func \(funcName)(\(extendedEnrichedParamsString))\(effectSpecifiers)\(returnClause)\(funcBody)
         """
     }
     

@@ -21,6 +21,14 @@ struct EnrichedParameter {
         
         return result
     }
+    
+    func toExecutableString() -> String {
+        if key.contains(" "), let argument = key.split(separator: " ").first, let value = key.split(separator: " ").last {
+            return "\(argument): \(String(value))"
+        } else {
+            return "\(key): \(key)"
+        }
+    }
 }
 
 extension FunctionParameterListSyntax {

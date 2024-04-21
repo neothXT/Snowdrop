@@ -29,17 +29,22 @@ final class SnowdropMacrosTests: XCTestCase {
                 func getPosts(for id: Int, model: Model) async throws -> Post
             }
             
-            class TestEndpointService {
-                private let baseUrl: URL
+            class TestEndpointService: TestEndpoint, Service {
+                let baseUrl: URL
             
                 static var beforeSending: ((URLRequest) -> URLRequest)?
                 static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
             
-                init(baseUrl: URL) {
+                required init(baseUrl: URL) {
                     self.baseUrl = baseUrl
                 }
+            
+                func getPosts(for id: Int = 2, model: Model) async throws -> Post {
+                    let _queryItems: [QueryItem] = []
+                    return try await getPosts(for: id, model: model, _queryItems: _queryItems)
+                }
 
-                func getPosts(for id: Int = 2, model: Model, _queryItems: [QueryItem] = []) async throws -> Post {
+                func getPosts(for id: Int = 2, model: Model, _queryItems: [QueryItem]) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/posts/\\(id)")
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
@@ -105,17 +110,25 @@ final class SnowdropMacrosTests: XCTestCase {
                 func uploadFile(file: UIImage) async throws -> Post
             }
             
-            public class TestEndpointService {
-                private let baseUrl: URL
+            public class TestEndpointService: TestEndpoint, Service {
+                public let baseUrl: URL
             
                 public static var beforeSending: ((URLRequest) -> URLRequest)?
                 public static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
             
-                public init(baseUrl: URL) {
+                public required init(baseUrl: URL) {
                     self.baseUrl = baseUrl
                 }
             
-                public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription, _queryItems: [QueryItem] = []) async throws -> Post {
+                public func uploadFile(file: UIImage) async throws -> Post {
+                    let _queryItems: [QueryItem] = []
+                    let _payloadDescription: PayloadDescription? = PayloadDescription(name: "payload",
+                                                                                      fileName: "payload",
+                                                                                      mimeType: MimeType(from: fileData).rawValue)
+                    return try await uploadFile(file: file, _payloadDescription: _payloadDescription, _queryItems: _queryItems)
+                }
+            
+                public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/file")
                     let headers: [String: Any] = [:]
             

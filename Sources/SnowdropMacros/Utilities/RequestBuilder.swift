@@ -10,6 +10,23 @@ import Foundation
 class RequestBuilder {
     private init() {}
     
+    static func buildShort(details: FuncBodyDetails) -> String {
+        var requestImpl = """
+        let _queryItems: [QueryItem] = []
+        """
+        
+        if details.isUploadingFile {
+            requestImpl += """
+            
+                let _payloadDescription: PayloadDescription? = PayloadDescription(name: "payload",
+                                                                                  fileName: "payload",
+                                                                                  mimeType: MimeType(from: fileData).rawValue)
+            """
+        }
+        
+        return requestImpl
+    }
+    
     static func build(details: FuncBodyDetails) -> String {
         var requestImpl = """
         
