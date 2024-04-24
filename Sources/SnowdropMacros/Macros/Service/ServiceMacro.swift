@@ -19,7 +19,7 @@ public struct ServiceMacro: PeerMacro {
         
         let access = decl.modifiers.first?.name.text ?? ""
         
-        let name = decl.name.text + "Service"
+        let name = decl.name.text
         let accessModifier = access == "" ? "" : "\(access) "
         
         let functions: String = decl.memberBlock.members.compactMap { member -> String? in
@@ -33,19 +33,39 @@ public struct ServiceMacro: PeerMacro {
             return function
         }.joined(separator: "\n\n")
         
-        return ["""
-        \(raw: accessModifier)class \(raw: name): \(raw: decl.name.text), Service {
-            \(raw: accessModifier)let baseUrl: URL
-        
-            \(raw: accessModifier)static var beforeSending: ((URLRequest) -> URLRequest)?
-            \(raw: accessModifier)static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
-        
-            \(raw: accessModifier)required init(baseUrl: URL) {
-                self.baseUrl = baseUrl
-            }
-        
-        \(raw: functions)
-        }
-        """]
+        return [printOutcome(accessModifier: accessModifier, name: name, functions: functions)]
+    }
+    
+    private static func printOutcome(accessModifier: String, name: String, functions: String) -> DeclSyntax {
+                """
+                \(raw: accessModifier)class \(raw: name)Service: \(raw: name), Service {
+                    \(raw: accessModifier)let baseUrl: URL
+                
+                    \(raw: accessModifier)var requestBlocks: [String: RequestHandler] = [:]
+                    \(raw: accessModifier)var responseBlocks: [String: ResponseHandler] = [:]
+                
+                    \(raw: accessModifier)required init(baseUrl: URL) {
+                        self.baseUrl = baseUrl
+                    }
+                
+                    \(raw: accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
+                        var key = "all"
+                        if let path {
+                            key = baseUrl.appending(path: path).absoluteString
+                        }
+                        requestBlocks[key] = block
+                    }
+                    
+                    \(raw: accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
+                        var key = "all"
+                        if let path {
+                            key = baseUrl.appending(path: path).absoluteString
+                        }
+                        responseBlocks[key] = block
+                    }
+                
+                \(raw: functions)
+                }
+                """
     }
 }

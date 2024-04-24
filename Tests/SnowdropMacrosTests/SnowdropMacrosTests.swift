@@ -32,11 +32,27 @@ final class SnowdropMacrosTests: XCTestCase {
             class TestEndpointService: TestEndpoint, Service {
                 let baseUrl: URL
             
-                static var beforeSending: ((URLRequest) -> URLRequest)?
-                static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+                var requestBlocks: [String: RequestHandler] = [:]
+                var responseBlocks: [String: ResponseHandler] = [:]
             
                 required init(baseUrl: URL) {
                     self.baseUrl = baseUrl
+                }
+            
+                func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
+                    var key = "all"
+                    if let path {
+                        key = baseUrl.appending(path: path).absoluteString
+                    }
+                    requestBlocks[key] = block
+                }
+            
+                func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
+                    var key = "all"
+                    if let path {
+                        key = baseUrl.appending(path: path).absoluteString
+                    }
+                    responseBlocks[key] = block
                 }
             
                 func getPosts(for id: Int = 2, model: Model) async throws -> Post {
@@ -46,6 +62,7 @@ final class SnowdropMacrosTests: XCTestCase {
 
                 func getPosts(for id: Int = 2, model: Model, _queryItems: [QueryItem]) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/posts/\\(id)")
+                    let rawUrl = baseUrl.appendingPathComponent("/posts/{id}").absoluteString
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
                     if !_queryItems.isEmpty {
@@ -67,19 +84,19 @@ final class SnowdropMacrosTests: XCTestCase {
                     var data: Data?
             
                     if let header = headers["Content-Type"] as? String, header == "application/x-www-form-urlencoded" {
-                        data = Snowdrop.Core.prepareUrlEncodedBody(data: model)
+                        data = Snowdrop.core.prepareUrlEncodedBody(data: model)
                     } else if let header = headers["Content-Type"] as? String, header == "application/json" {
-                        data = Snowdrop.Core.prepareBody(data: model)
+                        data = Snowdrop.core.prepareBody(data: model)
                     }
             
                     request.httpBody = data
             
-                    request = TestEndpointService.beforeSending?(request) ?? request
-                    let session = Snowdrop.Config.getSession()
-            
-                    return try await Snowdrop.Core.performRequestAndDecode(session: session,
-                                                                            request: request,
-                                                                            onResponse: TestEndpointService.onResponse)
+                    return try await Snowdrop.core.performRequestAndDecode(
+                        request,
+                        rawUrl: rawUrl,
+                        requestBlocks: requestBlocks,
+                        responseBlocks: responseBlocks
+                    )
                 }
             }
             """,
@@ -113,11 +130,27 @@ final class SnowdropMacrosTests: XCTestCase {
             public class TestEndpointService: TestEndpoint, Service {
                 public let baseUrl: URL
             
-                public static var beforeSending: ((URLRequest) -> URLRequest)?
-                public static var onResponse: ((Data?, HTTPURLResponse) -> Data?)?
+                public var requestBlocks: [String: RequestHandler] = [:]
+                public var responseBlocks: [String: ResponseHandler] = [:]
             
                 public required init(baseUrl: URL) {
                     self.baseUrl = baseUrl
+                }
+            
+                public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
+                    var key = "all"
+                    if let path {
+                        key = baseUrl.appending(path: path).absoluteString
+                    }
+                    requestBlocks[key] = block
+                }
+            
+                public func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
+                    var key = "all"
+                    if let path {
+                        key = baseUrl.appending(path: path).absoluteString
+                    }
+                    responseBlocks[key] = block
                 }
             
                 public func uploadFile(file: UIImage) async throws -> Post {
@@ -130,6 +163,7 @@ final class SnowdropMacrosTests: XCTestCase {
             
                 public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
                     var url = baseUrl.appendingPathComponent("/file")
+                    let rawUrl = baseUrl.appendingPathComponent("/file").absoluteString
                     let headers: [String: Any] = [:]
             
                     if !_queryItems.isEmpty {
@@ -152,14 +186,14 @@ final class SnowdropMacrosTests: XCTestCase {
                         request.addValue("multipart/form-data", forHTTPHeaderField: "Content-Type")
                     }
             
-                    request.httpBody = Snowdrop.Core.dataWithBoundary(file, payloadDescription: _payloadDescription)
+                    request.httpBody = Snowdrop.core.dataWithBoundary(file, payloadDescription: _payloadDescription)
             
-                    request = TestEndpointService.beforeSending?(request) ?? request
-                    let session = Snowdrop.Config.getSession()
-            
-                    return try await Snowdrop.Core.performRequestAndDecode(session: session,
-                                                                            request: request,
-                                                                            onResponse: TestEndpointService.onResponse)
+                    return try await Snowdrop.core.performRequestAndDecode(
+                        request,
+                        rawUrl: rawUrl,
+                        requestBlocks: requestBlocks,
+                        responseBlocks: responseBlocks
+                    )
                 }
             }
             """,

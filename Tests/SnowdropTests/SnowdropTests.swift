@@ -23,7 +23,7 @@ final class SnowdropTests: XCTestCase {
     
     func testQueryItems() async throws {
         let expectation = expectation(description: "Should contain queryItems")
-        TestEndpointService.beforeSending = { request in
+        service.addBeforeSendingBlock { request in
             if request.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/12?test=true" {
                 expectation.fulfill()
             }
@@ -36,7 +36,7 @@ final class SnowdropTests: XCTestCase {
     
     func testInterception() async throws {
         let expectation = expectation(description: "Should intercept request")
-        TestEndpointService.beforeSending = { request in
+        service.addBeforeSendingBlock { request in
             if request.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/7/comments" {
                 expectation.fulfill()
             }
@@ -49,11 +49,11 @@ final class SnowdropTests: XCTestCase {
     
     func testOnResponse() async throws {
         let expectation = expectation(description: "Should intercept response")
-        TestEndpointService.onResponse = { data, urlResponse in
+        service.addOnResponseBlock { data, urlResponse in
             if urlResponse.statusCode == 200 && urlResponse.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/9/comments" {
                 expectation.fulfill()
             }
-            return data
+            return (data, urlResponse)
         }
         _ = try await service.getComments(id: 9)
         
