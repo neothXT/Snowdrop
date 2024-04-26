@@ -20,6 +20,7 @@ Meet Snowdrop - type-safe, easy to use framework powered by Swift Macros created
     - [Query Parameters](#query-parameters)
     - [Arguments' Default Values](#arguments-default-values)
     - [Interceptors](#interceptors)
+    - [Mockable](#mockable)
 - [Acknowledgements](#acknowledgements)
 
 ## Installation
@@ -42,6 +43,7 @@ Snowdrop is available via SPM. It works with iOS Deployment Target has to be 14.
     - `@TRACE`
 - SSL/Certificate pinning
 - Interceptors
+- Mockable
 
 ## Basic Usage
 
@@ -117,6 +119,7 @@ func addPost(model: Post) async throws -> Data
 ### File Upload
 
 If you want to declare service's function that sends some file to the server as `multipart/form-data`, use `@FileUpload` macro. It'll automatically add `Content-Type: multipart/form-data` to the request's headers and extend the list of your function's arguments with `_payloadDescription: PayloadDescription` which you should then use to provide information such as `name`, `fileName` and `mimeType`.
+For mime types such as jpeg, png, gif, tiff, pdf, vnd, plain, octetStream, you don't have to provide `PayloadDescription`. Snowdrop can automatically recognize them and create `PayloadDescription` for you.
 
 ```Swift
 @Service
@@ -156,21 +159,54 @@ Snowdrop allows you to define custom values for your arguments. Let's say your p
 
 ### Interceptors
 
-Each service provides two static interceptors - `beforeSending` and `onResponse`. You should use them like:
+Each service provides two methods to add interception blocks - `addBeforeSendingBlock` and `addOnResponseBlock`. Both accept arguments such as `path` of type `String` and `block` which is closure.
+
+To add `addBeforeSendingBlock` or `addOnResponseBlock` for a request with pathVariables, do it like:
 
 ```Swift
-MyEndpointService.beforeSending = { request in
+service.addBeforeSendingBlock(for: "my/path/{id}/content") { urlRequest in
     // some operations
-    return request
+    return urlRequest
 }
+```
 
-MyEndpointService.onResponse = { data, urlResponse in
+To add `addBeforeSendingBlock` or `addOnResponseBlock` for ALL requests, do it like:
+
+```Swift
+service.addBeforeSendingBlock { data, httpUrlResponse in
     // some operations
     return data
 }
 ```
 
-Those interceptors are then called for each MyEndpointService function's call.
+Note that if you add interception block for a certain request path, general interceptors will be ignored.
+
+### Mockable
+
+If you'd like to create mockable version of your service, Snowdrop got you covered. Just add `@Mockable` macro to your service declaration like
+
+```Swift
+@Service
+@Mockable
+protocol Endpoint {
+    @Get("/path")
+    func getPosts() async throws -> [Posts]
+}
+```
+
+Snowdrop will automatically create a `EndpointServiceMock` class with all the properties `Service` should have and additional properties such as `getPostsResult` to which you can assign value that should be returned.
+
+#### Sample usage:
+
+```Swift
+func testEmptyArrayResult() async throws {
+let mock = EndpointServiceMock(baseUrl: URL(string: "https://some.url")!
+mock.getPostsResult = .success([])
+
+let result = try await mock.getPosts()
+
+XCTAssertTrue(result.isEmpty)
+```
 
 ## Acknowledgements
 

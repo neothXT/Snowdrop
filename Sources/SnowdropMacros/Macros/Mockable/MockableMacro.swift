@@ -1,8 +1,8 @@
 //
-//  ServiceMacro.swift
-//  Snowdrop
+//  MockableMacro.swift
 //
-//  Created by Maciej Burdzicki on 29/01/2024.
+//
+//  Created by Maciej Burdzicki on 26/04/2024.
 //
 
 import SwiftCompilerPlugin
@@ -11,7 +11,7 @@ import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import Foundation
 
-public struct ServiceMacro: PeerMacro {
+public struct MockableMacro: PeerMacro {
     public static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
         guard let decl = declaration.as(ProtocolDeclSyntax.self) else {
             throw ServiceMacroError.badType
@@ -26,13 +26,29 @@ public struct ServiceMacro: PeerMacro {
             guard let fDecl = member.decl.as(FunctionDeclSyntax.self) else { return nil }
             var function: String?
             do {
-                function = try ServiceMethodBuilder.map(accessModifier: accessModifier, declaration: fDecl, serviceName: name)
+                function = try MockableMethodBuilder.map(accessModifier: accessModifier, declaration: fDecl, serviceName: name)
             } catch {
                 context.diagnose((error as! Diagnostics).generate(for: member, severity: .error, fixIts: []))
             }
             return function
         }.joined(separator: "\n\n")
+
+        let functionResults: String = decl.memberBlock.members.compactMap { member -> String? in
+            guard let fDecl = member.decl.as(FunctionDeclSyntax.self),
+                  let returnType = fDecl.signature.returnClause?.type.description else {
+                return nil
+            }
+            
+            let funcName = fDecl.name.text
+            return "\(accessModifier)var \(funcName)Result: Result<\(returnType), Error> = .failure(SnowdropError(type: .unknown))"
+        }.joined(separator: "\n")
         
-        return [ClassBuilder.printOutcome(type: .service, accessModifier: accessModifier, name: name, functions: functions)]
+        let functionsAndResults = functionResults + "\n\n" + functions
+        
+        return [
+            """
+            \(raw: ClassBuilder.printOutcome(type: .mock, accessModifier: accessModifier, name: name, functions: functionsAndResults))
+            """
+        ]
     }
 }

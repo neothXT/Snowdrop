@@ -10,8 +10,8 @@ import Foundation
 public protocol Service {
     var baseUrl: URL { get }
 
-    static var beforeSending: ((URLRequest) -> URLRequest)? { get set }
-    static var onResponse: ((Data?, HTTPURLResponse) -> Data?)? { get set }
+    var requestBlocks: [String: RequestHandler] { get set }
+    var responseBlocks: [String: ResponseHandler] { get set }
 
     init(baseUrl: URL)
 }

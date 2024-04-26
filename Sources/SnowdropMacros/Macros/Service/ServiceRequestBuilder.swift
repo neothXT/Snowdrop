@@ -1,5 +1,5 @@
 //
-//  RequestBuilder.swift
+//  ServiceRequestBuilder.swift
 //  Snowdrop
 //
 //  Created by Maciej Burdzicki on 29/01/2024.
@@ -7,8 +7,8 @@
 
 import Foundation
 
-class RequestBuilder {
-    private init() {}
+struct ServiceRequestBuilder: ClassMethodBodyBuilderProtocol {
+    private init() { /* NOP */}
     
     static func buildShort(details: FuncBodyDetails) -> String {
         var requestImpl = """
@@ -53,54 +53,42 @@ class RequestBuilder {
                     request.addValue("multipart/form-data", forHTTPHeaderField: "Content-Type")
                 }
             
-                request.httpBody = Snowdrop.Core.dataWithBoundary(\(body), payloadDescription: _payloadDescription)\n\n
+                request.httpBody = Snowdrop.core.dataWithBoundary(\(body), payloadDescription: _payloadDescription)\n\n
             """
         } else if let body = details.body?.key {
             requestImpl += """
                 var data: Data?
             
                 if let header = headers["Content-Type"] as? String, header == "application/x-www-form-urlencoded" {
-                    data = Snowdrop.Core.prepareUrlEncodedBody(data: \(body))
+                    data = Snowdrop.core.prepareUrlEncodedBody(data: \(body))
                 } else if let header = headers["Content-Type"] as? String, header == "application/json" {
-                    data = Snowdrop.Core.prepareBody(data: \(body))
+                    data = Snowdrop.core.prepareBody(data: \(body))
                 }
             
                 request.httpBody = data\n\n
             """
         }
         
-        requestImpl += """
-            request = \(details.serviceName).beforeSending?(request) ?? request
-            let session = Snowdrop.Config.getSession()\n\n
-        """
-        
         if let _ = details.returnType {
             requestImpl += """
-                return try\(details.doesThrow ? "" : "?") await Snowdrop.Core.performRequestAndDecode(session: session,
-                                                                        request: request,
-                                                                        onResponse: \(details.serviceName).onResponse)
+                return try\(details.doesThrow ? "" : "?") await Snowdrop.core.performRequestAndDecode(
+                    request,
+                    rawUrl: rawUrl,
+                    requestBlocks: requestBlocks,
+                    responseBlocks: responseBlocks
+                )
             """
         } else {
             requestImpl += """
-                _ = try\(details.doesThrow ? "" : "?") await Snowdrop.Core.performRequest(session: session,
-                                                            request: request,
-                                                            onResponse: \(details.serviceName).onResponse)
+                _ = try\(details.doesThrow ? "" : "?") await Snowdrop.core.performRequest(
+                    request,
+                    rawUrl: rawUrl,
+                    requestBlocks: requestBlocks,
+                    responseBlocks: responseBlocks
+                )
             """
         }
         
         return requestImpl
-    }
-}
-
-extension RequestBuilder {
-    struct FuncBodyDetails {
-        let url: String
-        let method: String
-        let headers: String
-        let body: EnrichedParameter?
-        let returnType: String?
-        let isUploadingFile: Bool
-        let serviceName: String
-        let doesThrow: Bool
     }
 }

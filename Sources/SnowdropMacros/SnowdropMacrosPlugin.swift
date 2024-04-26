@@ -24,6 +24,7 @@ struct SnowdropMacrosPlugin: CompilerPlugin {
         ServiceMacro.self,
         HeadersMacro.self,
         BodyMacro.self,
-        FileUploadMacro.self
+        FileUploadMacro.self,
+        MockableMacro.self
     ]
 }

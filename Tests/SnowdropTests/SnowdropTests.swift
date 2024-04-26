@@ -9,7 +9,9 @@ import XCTest
 @testable import Snowdrop
 
 final class SnowdropTests: XCTestCase {
-    private let service = TestEndpointService(baseUrl: URL(string: "https://jsonplaceholder.typicode.com")!)
+    private let baseUrl = URL(string: "https://jsonplaceholder.typicode.com")!
+    private lazy var service = TestEndpointService(baseUrl: baseUrl)
+    private lazy var mock = TestEndpointServiceMock(baseUrl: baseUrl)
 
     func testGetTask() async throws {
         let result = try await service.getPost()
@@ -18,12 +20,12 @@ final class SnowdropTests: XCTestCase {
     
     func testPostTask() async throws {
         let result = try await service.addPost(model: .init(id: 101, userId: 1, title: "Some title", body: "some body"))
-        XCTAssert(result.title == "Some title")
+        XCTAssertTrue(result.title == "Some title")
     }
     
     func testQueryItems() async throws {
         let expectation = expectation(description: "Should contain queryItems")
-        TestEndpointService.beforeSending = { request in
+        service.addBeforeSendingBlock { request in
             if request.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/12?test=true" {
                 expectation.fulfill()
             }
@@ -36,7 +38,7 @@ final class SnowdropTests: XCTestCase {
     
     func testInterception() async throws {
         let expectation = expectation(description: "Should intercept request")
-        TestEndpointService.beforeSending = { request in
+        service.addBeforeSendingBlock { request in
             if request.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/7/comments" {
                 expectation.fulfill()
             }
@@ -49,7 +51,7 @@ final class SnowdropTests: XCTestCase {
     
     func testOnResponse() async throws {
         let expectation = expectation(description: "Should intercept response")
-        TestEndpointService.onResponse = { data, urlResponse in
+        service.addOnResponseBlock(for: "posts/{id}/comments") { data, urlResponse in
             if urlResponse.statusCode == 200 && urlResponse.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/9/comments" {
                 expectation.fulfill()
             }
@@ -62,6 +64,23 @@ final class SnowdropTests: XCTestCase {
     
     func testNonThrowingPosts() async throws {
         let result = await service.getNonThrowingPosts()
-        XCTAssert(result != nil)
+        XCTAssertNotNil(result)
+    }
+    
+    func testPositiveGetTaskMock() async throws {
+        let post = Post(id: 1, userId: 1, title: "Mock title", body: "Mock body")
+        mock.getPostResult = .success(post)
+        let result = try await mock.getPost()
+        XCTAssertTrue(post.title == result.title)
+    }
+    
+    func testNegativeGetTaskMock() async throws {
+        mock.getPostResult = .failure(SnowdropError(type: .emptyResponse))
+        do {
+            let _ = try await mock.getPost()
+        } catch {
+            let snowdropError = try XCTUnwrap(error as? SnowdropError)
+            XCTAssertTrue(snowdropError.type == .emptyResponse)
+        }
     }
 }
