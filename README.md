@@ -20,7 +20,7 @@ Meet Snowdrop - type-safe, easy to use framework powered by Swift Macros created
     - [Query Parameters](#query-parameters)
     - [Arguments' Default Values](#arguments-default-values)
     - [Interceptors](#interceptors)
-    - [Mockable][#mockable]
+    - [Mockable](#mockable)
 - [Acknowledgements](#acknowledgements)
 
 ## Installation
