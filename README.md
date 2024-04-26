@@ -42,6 +42,7 @@ Snowdrop is available via SPM. It works with iOS Deployment Target has to be 14.
     - `@TRACE`
 - SSL/Certificate pinning
 - Interceptors
+- Mockable
 
 ## Basic Usage
 
@@ -178,6 +179,33 @@ service.addBeforeSendingBlock { data, httpUrlResponse in
 ```
 
 Note that if you add interception block for a certain request path, general interceptors will be ignored.
+
+### Mockable
+
+If you'd like to create mockable version of your service, Snowdrop got you covered. Just add `@Mockable` macro to your service declaration like
+
+```Swift
+@Service
+@Mockable
+protocol Endpoint {
+    @Get("/path")
+    func getPosts() async throws -> [Posts]
+}
+```
+
+Snowdrop will automatically create a `EndpointServiceMock` class with all the properties `Service` should have and additional properties such as `getPostsResult` to which you can assign value that should be returned.
+
+#### Sample usage:
+
+```Swift
+func testEmptyArrayResult() async throws {
+let mock = EndpointServiceMock(baseUrl: URL(string: "https://some.url")!
+mock.getPostsResult = .success([])
+
+let result = try await mock.getPosts()
+
+XCTAssertTrue(result.isEmpty)
+```
 
 ## Acknowledgements
 
