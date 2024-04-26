@@ -21,7 +21,7 @@ public struct SnowdropError: Error {
 
 public extension SnowdropError {
     enum ErrorType {
-        case failedToBuildRequest, failedToMapResponse, unexpectedResponse, authenticationFailed, notConnected, emptyResponse, conversionFailed, noInternetConnection, requestFinished, finishedWithoutValue
+        case failedToBuildRequest, failedToMapResponse, unexpectedResponse, authenticationFailed, notConnected, emptyResponse, conversionFailed, noInternetConnection, requestFinished, finishedWithoutValue, unknown
     }
     
     var errorDescription: String? {
@@ -55,6 +55,9 @@ public extension SnowdropError {
             
         case .finishedWithoutValue:
             return "Request finished without value."
+        
+        case .unknown:
+            return "Unknown"
         }
     }
 }

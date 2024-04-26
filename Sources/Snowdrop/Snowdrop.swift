@@ -8,7 +8,7 @@
 import Foundation
 
 public typealias RequestHandler = (URLRequest) -> URLRequest
-public typealias ResponseHandler = (Data, HTTPURLResponse) -> (Data, HTTPURLResponse)
+public typealias ResponseHandler = (Data, HTTPURLResponse) -> (Data)
 
 public struct Snowdrop {
     public static let config = Config()

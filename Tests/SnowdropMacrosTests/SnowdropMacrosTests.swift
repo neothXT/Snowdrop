@@ -112,7 +112,7 @@ final class SnowdropMacrosTests: XCTestCase {
     func testUploadMacro() throws {
         assertMacroExpansion(
             """
-            @Service(url: "https://google.com")
+            @Service
             public protocol TestEndpoint {
                 @POST(url: "/file")
                 @FileUpload
@@ -199,6 +199,74 @@ final class SnowdropMacrosTests: XCTestCase {
             """,
             macros: [
                 "Service": ServiceMacro.self,
+                "POST": GetMacro.self,
+                "Body": BodyMacro.self,
+                "FileUpload": FileUploadMacro.self
+            ]
+        )
+    }
+    
+    func testMockableMacro() throws {
+        assertMacroExpansion(
+            """
+            @Mockable
+            public protocol TestEndpoint {
+                @POST(url: "/file")
+                @FileUpload
+                @Body("file")
+                func uploadFile(file: UIImage) async throws -> Post
+            }
+            """,
+            expandedSource:
+            """
+            
+            public protocol TestEndpoint {
+                func uploadFile(file: UIImage) async throws -> Post
+            }
+            
+            public class TestEndpointServiceMock: TestEndpoint, Service {
+                public let baseUrl: URL
+            
+                public var requestBlocks: [String: RequestHandler] = [:]
+                public var responseBlocks: [String: ResponseHandler] = [:]
+            
+                public required init(baseUrl: URL) {
+                    self.baseUrl = baseUrl
+                }
+            
+                public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
+                    var key = "all"
+                    if let path {
+                        key = baseUrl.appending(path: path).absoluteString
+                    }
+                    requestBlocks[key] = block
+                }
+            
+                public func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
+                    var key = "all"
+                    if let path {
+                        key = baseUrl.appending(path: path).absoluteString
+                    }
+                    responseBlocks[key] = block
+                }
+            
+                public var uploadFileResult: Result<Post, Error> = .failure(SnowdropError(type: .unknown))
+            
+                public func uploadFile(file: UIImage) async throws -> Post {
+                    let _queryItems: [QueryItem] = []
+                    let _payloadDescription: PayloadDescription? = PayloadDescription(name: "payload",
+                                                                                      fileName: "payload",
+                                                                                      mimeType: MimeType(from: fileData).rawValue)
+                    return try await uploadFile(file: file, _payloadDescription: _payloadDescription, _queryItems: _queryItems)
+                }
+            
+                public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
+                    try uploadFileResult.get()
+                }
+            }
+            """,
+            macros: [
+                "Mockable": MockableMacro.self,
                 "POST": GetMacro.self,
                 "Body": BodyMacro.self,
                 "FileUpload": FileUploadMacro.self

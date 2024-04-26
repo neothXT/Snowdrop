@@ -20,6 +20,7 @@ public struct Comment: Codable {
 }
 
 @Service
+@Mockable
 public protocol TestEndpoint {
 
     @GET(url: "/posts/{id=2}")
@@ -34,9 +35,6 @@ public protocol TestEndpoint {
     ])
     @Body("model")
     func addPost(model: Post) async throws -> Post
-    
-    @POST(url: "/posts")
-    func addPost(body: Post) async throws -> Post
     
     @GET(url: "/posts/")
     func getNonThrowingPosts() async -> [Post]?

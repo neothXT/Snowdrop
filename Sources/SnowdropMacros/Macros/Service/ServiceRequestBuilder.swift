@@ -1,5 +1,5 @@
 //
-//  RequestBuilder.swift
+//  ServiceRequestBuilder.swift
 //  Snowdrop
 //
 //  Created by Maciej Burdzicki on 29/01/2024.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class RequestBuilder {
+struct ServiceRequestBuilder: ClassMethodBodyBuilderProtocol {
     private init() { /* NOP */}
     
     static func buildShort(details: FuncBodyDetails) -> String {
@@ -90,19 +90,5 @@ class RequestBuilder {
         }
         
         return requestImpl
-    }
-}
-
-extension RequestBuilder {
-    struct FuncBodyDetails {
-        let url: String
-        let rawUrl: String
-        let method: String
-        let headers: String
-        let body: EnrichedParameter?
-        let returnType: String?
-        let isUploadingFile: Bool
-        let serviceName: String
-        let doesThrow: Bool
     }
 }

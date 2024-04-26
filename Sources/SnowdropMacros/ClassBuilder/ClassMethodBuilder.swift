@@ -1,56 +1,28 @@
 //
-//  FunctionMapper.swift
-//  Snowdrop
+//  ClassMethodBuilder.swift.swift
 //
-//  Created by Maciej Burdzicki on 29/01/2024.
+//
+//  Created by Maciej Burdzicki on 26/04/2024.
 //
 
-import Foundation
 import SwiftSyntax
 
-class FunctionMapper {
-    private init() { /* NOP */ }
-    
-    static func map(accessModifier: String, declaration decl: FunctionDeclSyntax, serviceName: String) throws -> String {
-        let fDetails = try generateDetails(accessModifier: accessModifier, decl: decl, serviceName: serviceName)
-        let bodyDetails = try generateBodyDetails(accessModifier: accessModifier, decl: decl, serviceName: serviceName)
-        
-        let funcBody = generateBody(details: bodyDetails)
-        let shortBody = RequestBuilder.buildShort(details: bodyDetails)
-        
-        return """
-        \(accessModifier)func \(fDetails.funcName)(\(fDetails.enrichedParamsString))\(fDetails.effectSpecifiers)\(fDetails.returnClause) {
-            \(shortBody)
-            return \(bodyDetails.doesThrow ? "try await" : "await") \(fDetails.funcName)(\(fDetails.executableEnrichedParamsString))
-        }
-        
-        \(accessModifier)func \(fDetails.funcName)(\(fDetails.extendedEnrichedParamsString))\(fDetails.effectSpecifiers)\(fDetails.returnClause)\(funcBody)
-        """
-    }
-    
-    private static func generateBody(details: RequestBuilder.FuncBodyDetails) -> String {
-        """
-        {
-            var url = baseUrl.appendingPathComponent("\(details.url)")
-            let rawUrl = baseUrl.appendingPathComponent("\(details.rawUrl)").absoluteString
-            let headers: [String: Any] = \(details.headers)
-            \(RequestBuilder.build(details: details))
-        }
-        """
-    }
-    
-    private static func generateDetails(
+protocol ClassMethodBuilderProtocol {
+    static func map(accessModifier: String, declaration decl: FunctionDeclSyntax, serviceName: String) throws -> String
+}
+
+protocol ClassMethodBodyBuilderProtocol {
+    static func buildShort(details: FuncBodyDetails) -> String
+    static func build(details: FuncBodyDetails) -> String
+}
+
+extension ClassMethodBuilderProtocol {
+    static func generateDetails(
         accessModifier: String,
-        decl: FunctionDeclSyntax,
-        serviceName: String
+        decl: FunctionDeclSyntax
     ) throws -> FuncDetails {
-        guard let passedArguments = decl.getPassedArguments(),
-              let url = passedArguments.url else {
+        guard let passedArguments = decl.getPassedArguments() else {
             throw RequestMacroError.badOrMissingUrlParameter
-        }
-        
-        guard let method = decl.methodType?.rawValue.uppercased() else {
-            throw RequestMacroError.badOrMissingMethodParameter
         }
         
         let enrichedParams = decl.signature.parameterClause.parameters.asEnrichedStringParams(defaultValues: passedArguments.urlParams)
@@ -69,9 +41,6 @@ class FunctionMapper {
         
         extendedEnrichedParams.append(.init(key: "_queryItems", type: "[QueryItem]", value: nil))
         
-        let extendedEnrichedParamsString = extendedEnrichedParams.map { $0.toString() }.joined(separator: ", ")
-        let executableEnrichedParamsString = extendedEnrichedParams.map { $0.toExecutableString() }.joined(separator: ", ")
-        
         return .init(
             funcName: decl.name.text,
             enrichedParamsString: enrichedParams.map { $0.toString() }.joined(separator: ", "),
@@ -82,11 +51,11 @@ class FunctionMapper {
         )
     }
     
-    private static func generateBodyDetails(
+    static func generateBodyDetails(
         accessModifier: String,
         decl: FunctionDeclSyntax,
         serviceName: String
-    ) throws -> RequestBuilder.FuncBodyDetails {
+    ) throws -> FuncBodyDetails {
         guard let passedArguments = decl.getPassedArguments(),
               let url = passedArguments.url else {
             throw RequestMacroError.badOrMissingUrlParameter
@@ -133,16 +102,5 @@ class FunctionMapper {
         }
         
         return rawUrl.replacingOccurrences(of: "=", with: "")
-    }
-}
-
-extension FunctionMapper {
-    struct FuncDetails {
-        let funcName: String
-        let enrichedParamsString: String
-        let extendedEnrichedParamsString: String
-        let executableEnrichedParamsString: String
-        let effectSpecifiers: String
-        let returnClause: String
     }
 }

@@ -92,7 +92,11 @@ extension Snowdrop.Core {
         for request: inout URLRequest,
         rawUrl: String
     ) {
-        let pathBlocks = blocks.filter { $0.key == rawUrl || $0.key == "all" }.values
+        var pathBlocks = blocks.filter { $0.key == rawUrl }.values
+        
+        if pathBlocks.isEmpty {
+            pathBlocks = blocks.filter { $0.key == "all" }.values
+        }
         
         pathBlocks.forEach { block in
             request = block(request)
@@ -105,10 +109,14 @@ extension Snowdrop.Core {
         response: inout HTTPURLResponse,
         rawUrl: String
     ) {
-        let pathBlocks = blocks.filter { $0.key == rawUrl || $0.key == "all" }.values
+        var pathBlocks = blocks.filter { $0.key == rawUrl }.values
+        
+        if pathBlocks.isEmpty {
+            pathBlocks = blocks.filter { $0.key == "all" }.values
+        }
         
         pathBlocks.forEach { block in
-            (data, response) = block(data, response)
+            data = block(data, response)
         }
     }
 }
