@@ -22,11 +22,10 @@ public struct Comment: Codable {
 @Service
 @Mockable
 public protocol TestEndpoint {
-
     @GET(url: "/posts/{id=2}")
     func getPost(id: Int) async throws -> Post
     
-    @GET(url: "/posts/{id}/comments")
+    @GET(url: "/posts/{id=4}/comments")
     func getComments(id: Int) async throws -> [Comment]
     
     @POST(url: "/posts")

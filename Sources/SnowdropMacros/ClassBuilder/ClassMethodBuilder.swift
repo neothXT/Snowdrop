@@ -6,6 +6,7 @@
 //
 
 import SwiftSyntax
+import Foundation
 
 protocol ClassMethodBuilderProtocol {
     static func map(accessModifier: String, declaration decl: FunctionDeclSyntax, serviceName: String) throws -> String
@@ -72,7 +73,7 @@ extension ClassMethodBuilderProtocol {
         let returnType = decl.signature.returnClause?.type.description
 
         return .init(
-            url: escape(url),
+            url: try escape(url),
             rawUrl: rawUrl(from: url, enrichedParams: enrichedParams),
             method: method,
             headers: passedArguments.headers ?? "[:]",
@@ -84,13 +85,24 @@ extension ClassMethodBuilderProtocol {
         )
     }
     
-    private static func escape(_ string: String) -> String {
-        let outcome = string
-            .replacingOccurrences(of: "{", with: "\\(")
-            .replacingOccurrences(of: "}", with: ")")
-            .split(separator: "=")
+    private static func escape(_ string: String) throws -> String {
+        var outcome = string
+        let shortRegex = "=[a-zA-Z0-9\"]+"
+        let regex = try NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+={0,1}[a-zA-Z0-9\"]*\}"#, options: [])
+        let matches = regex.matches(in: string, range: .init(location: 0, length: string.count))
         
-        return outcome.count > 1 ? String(outcome.first ?? "") + ")" : String(outcome.first ?? "")
+        matches.forEach { match in
+            guard let matchRange = Range(match.range) else { return }
+            let startIndex = string.index(string.startIndex, offsetBy: matchRange.lowerBound)
+            let endIndex = string.index(string.startIndex, offsetBy: matchRange.upperBound)
+            let range = startIndex ..< endIndex
+            outcome = outcome
+                .replacingOccurrences(of: "}", with: ")", range: range)
+                .replacingOccurrences(of: "{", with: "\\(", range: range)
+                .replacingOccurrences(of: shortRegex, with: "", options: .regularExpression, range: range)
+        }
+        
+        return outcome
     }
     
     private static func rawUrl(from url: String, enrichedParams: [EnrichedParameter]) -> String {

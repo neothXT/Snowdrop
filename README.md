@@ -156,6 +156,7 @@ let post = try await service.getPost(id: 7, _queryItems: [.init(key: "author", v
 ### Arguments' Default Values
 
 Snowdrop allows you to define custom values for your arguments. Let's say your path includes `{id}` argument. As you already know by now, Snowdrop automatically associates it with `id` argument of your `func` declaration. If you want it to have default value equal "3", do it like: `{id=3}`. Be careful though as Snowdrop won't check if your default value's type conforms to the declaration.  
+When inserting `String` default values such as {name="Some name"}, it is strongly recommended to use `Raw String` like `@GET(url: #"/authors/{name="John Smith"}"#)`.
 
 ### Interceptors
 

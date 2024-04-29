@@ -16,7 +16,7 @@ final class SnowdropMacrosTests: XCTestCase {
             """
             @Service
             protocol TestEndpoint {
-                @GET(url: "/posts/{id=2}")
+                @GET(url: "/posts/{id=2}/comments")
                 @Headers(["Content-Type": "application/json"])
                 @Body("model")
                 func getPosts(for id: Int, model: Model) async throws -> Post
@@ -61,8 +61,8 @@ final class SnowdropMacrosTests: XCTestCase {
                 }
 
                 func getPosts(for id: Int = 2, model: Model, _queryItems: [QueryItem]) async throws -> Post {
-                    var url = baseUrl.appendingPathComponent("/posts/\\(id)")
-                    let rawUrl = baseUrl.appendingPathComponent("/posts/{id}").absoluteString
+                    var url = baseUrl.appendingPathComponent("/posts/\\(id)/comments")
+                    let rawUrl = baseUrl.appendingPathComponent("/posts/{id}/comments").absoluteString
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
                     if !_queryItems.isEmpty {

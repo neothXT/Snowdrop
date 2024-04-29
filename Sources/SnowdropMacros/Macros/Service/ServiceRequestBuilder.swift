@@ -8,7 +8,7 @@
 import Foundation
 
 struct ServiceRequestBuilder: ClassMethodBodyBuilderProtocol {
-    private init() { /* NOP */}
+    private init() { /* NOP */ }
     
     static func buildShort(details: FuncBodyDetails) -> String {
         var requestImpl = """
