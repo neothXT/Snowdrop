@@ -89,12 +89,16 @@ extension ClassMethodBuilderProtocol {
         var outcome = string
         let shortRegex = "=[a-zA-Z0-9\"]+"
         let regex = try NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+={0,1}[a-zA-Z0-9\"]*\}"#, options: [])
-        let matches = regex.matches(in: string, range: .init(location: 0, length: string.count))
+        let matchesCount = regex.matches(in: string, range: .init(location: 0, length: string.count)).count
         
-        matches.forEach { match in
-            guard let matchRange = Range(match.range) else { return }
-            let startIndex = string.index(string.startIndex, offsetBy: matchRange.lowerBound)
-            let endIndex = string.index(string.startIndex, offsetBy: matchRange.upperBound)
+        (0 ..< matchesCount).forEach { _ in
+            guard let match = regex.firstMatch(in: outcome, range: .init(location: 0, length: outcome.count)),
+                  let matchRange = Range(match.range) else {
+                return
+            }
+            
+            let startIndex = outcome.index(outcome.startIndex, offsetBy: matchRange.lowerBound)
+            let endIndex = outcome.index(outcome.startIndex, offsetBy: matchRange.upperBound)
             let range = startIndex ..< endIndex
             outcome = outcome
                 .replacingOccurrences(of: "}", with: ")", range: range)

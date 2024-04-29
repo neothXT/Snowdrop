@@ -28,6 +28,9 @@ public protocol TestEndpoint {
     @GET(url: "/posts/{id=4}/comments")
     func getComments(id: Int) async throws -> [Comment]
     
+    @GET(url: "/posts/{id=4}/comments/{commentId=2}")
+    func getCertainComment(id: Int, commentId: Int) async throws -> [Comment]
+    
     @POST(url: "/posts")
     @Headers([
         "Content-Type": "application/json",
