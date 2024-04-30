@@ -14,4 +14,7 @@ public protocol Service {
     var responseBlocks: [String: ResponseHandler] { get set }
 
     init(baseUrl: URL)
+    
+    func addBeforeSendingBlock(for path: String?, _ block: @escaping RequestHandler)
+    func addOnResponseBlock(for path: String?, _ block: @escaping ResponseHandler)
 }

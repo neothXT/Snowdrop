@@ -11,77 +11,81 @@ import Foundation
 
 public extension Snowdrop.Core {
     @discardableResult
-            func performRequest(
-                _ request: URLRequest,
-                rawUrl: String,
-                requestBlocks: [String: RequestHandler],
-                responseBlocks: [String: ResponseHandler]
-            ) async throws -> (Data?, HTTPURLResponse) {
-                let session = Snowdrop.config.getSession()
-                var data: Data?
-                var urlResponse: URLResponse?
-                
-                var finalRequest = request
-                applyRequestBlocks(requestBlocks, for: &finalRequest, rawUrl: rawUrl)
+    func performRequest(
+        _ request: URLRequest,
+        rawUrl: String,
+        requestBlocks: [String: RequestHandler],
+        responseBlocks: [String: ResponseHandler]
+    ) async throws -> (Data?, HTTPURLResponse) {
+        let session = Snowdrop.config.getSession()
+        var data: Data?
+        var urlResponse: URLResponse?
+        
+        var finalRequest = request
+        applyRequestBlocks(requestBlocks, for: &finalRequest, rawUrl: rawUrl)
+        
+        do {
+            (data, urlResponse) = try await session.data(for: finalRequest)
+        } catch {
+            try handleError(error as NSError)
+        }
+        
+        guard var response = urlResponse as? HTTPURLResponse else {
+            throw SnowdropError(type: .failedToMapResponse)
+        }
+        
+        guard var finalData = data else {
+            return (data, response)
+        }
+        
+        applyResponseBlocks(responseBlocks, forData: &finalData, response: &response, rawUrl: rawUrl)
+        
+        return (finalData, response)
+    }
     
-                do {
-                    (data, urlResponse) = try await session.data(for: finalRequest)
-                } catch {
-                    let networkErrorCodes = [
-                        NSURLErrorNetworkConnectionLost,
-                        NSURLErrorNotConnectedToInternet,
-                        NSURLErrorCannotLoadFromNetwork
-                    ]
-                    let error = error as NSError
-                    let errorType: SnowdropError.ErrorType = networkErrorCodes.contains(error.code) ? .noInternetConnection : .unexpectedResponse
-                    let errorDetails = SnowdropErrorDetails(statusCode: error.code,
-                                                            localizedString: error.localizedDescription)
-                    let SnowdropError = SnowdropError(type: errorType, details: errorDetails)
-                    throw SnowdropError
-                }
+    func performRequestAndDecode<T: Codable>(
+        _ request: URLRequest,
+        rawUrl: String,
+        requestBlocks: [String: RequestHandler],
+        responseBlocks: [String: ResponseHandler]
+    ) async throws -> T {
+        let (data, response) = try await performRequest(
+            request,
+            rawUrl: rawUrl,
+            requestBlocks: requestBlocks,
+            responseBlocks: responseBlocks
+        )
+        
+        guard let unwrappedData = data,
+              let decodedData = try? Snowdrop.config.defaultJSONDecoder.decode(T.self, from: unwrappedData) else {
+            throw SnowdropError(
+                type: .failedToMapResponse,
+                details: .init(
+                    statusCode: response.statusCode,
+                    localizedString: HTTPURLResponse.localizedString(forStatusCode: response.statusCode),
+                    url: response.url,
+                    mimeType: response.mimeType,
+                    headers: response.allHeaderFields),
+                data: data
+            )
+        }
+        
+        return decodedData
+    }
     
-                guard var response = urlResponse as? HTTPURLResponse else {
-                    throw SnowdropError(type: .failedToMapResponse)
-                }
-                
-                guard var finalData = data else {
-                    return (data, response)
-                }
-                
-                applyResponseBlocks(responseBlocks, forData: &finalData, response: &response, rawUrl: rawUrl)
-    
-                return (finalData, response)
-            }
-    
-            func performRequestAndDecode<T: Codable>(
-                _ request: URLRequest,
-                rawUrl: String,
-                requestBlocks: [String: RequestHandler],
-                responseBlocks: [String: ResponseHandler]
-            ) async throws -> T {
-                let (data, response) = try await performRequest(
-                    request,
-                    rawUrl: rawUrl,
-                    requestBlocks: requestBlocks,
-                    responseBlocks: responseBlocks
-                )
-    
-                guard let unwrappedData = data,
-                        let decodedData = try? Snowdrop.config.defaultJSONDecoder.decode(T.self, from: unwrappedData) else {
-                    throw SnowdropError(
-                        type: .failedToMapResponse,
-                        details: .init(
-                            statusCode: response.statusCode,
-                            localizedString: HTTPURLResponse.localizedString(forStatusCode: response.statusCode),
-                            url: response.url,
-                            mimeType: response.mimeType,
-                            headers: response.allHeaderFields),
-                        data: data
-                    )
-                }
-    
-                return decodedData
-            }
+    private func handleError(_ error: NSError) throws {
+        let networkErrorCodes = [
+            NSURLErrorNetworkConnectionLost,
+            NSURLErrorNotConnectedToInternet,
+            NSURLErrorCannotLoadFromNetwork
+        ]
+        
+        let errorType: SnowdropError.ErrorType = networkErrorCodes.contains(error.code) ? .noInternetConnection : .unexpectedResponse
+        let errorDetails = SnowdropErrorDetails(statusCode: error.code,
+                                                localizedString: error.localizedDescription)
+        let SnowdropError = SnowdropError(type: errorType, details: errorDetails)
+        throw SnowdropError
+    }
 }
 
 // MARK: RequestBlock appliance

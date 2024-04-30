@@ -16,11 +16,13 @@ struct ServiceMethodBuilder: ClassMethodBuilderProtocol  {
         
         let funcBody = generateBody(details: bodyDetails)
         let shortBody = ServiceRequestBuilder.buildShort(details: bodyDetails)
+        let awaitStmt = bodyDetails.doesThrow ? "try await" : "await"
+        let optionalReturn = bodyDetails.returnType == nil ? "" : "return "
         
         return """
         \(accessModifier)func \(fDetails.funcName)(\(fDetails.enrichedParamsString))\(fDetails.effectSpecifiers)\(fDetails.returnClause) {
             \(shortBody)
-            return \(bodyDetails.doesThrow ? "try await" : "await") \(fDetails.funcName)(\(fDetails.executableEnrichedParamsString))
+            \(optionalReturn)\(awaitStmt) \(fDetails.funcName)(\(fDetails.executableEnrichedParamsString))
         }
         
         \(accessModifier)func \(fDetails.funcName)(\(fDetails.extendedEnrichedParamsString))\(fDetails.effectSpecifiers)\(fDetails.returnClause)\(funcBody)
