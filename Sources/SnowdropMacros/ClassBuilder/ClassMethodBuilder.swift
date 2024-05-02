@@ -110,13 +110,24 @@ extension ClassMethodBuilderProtocol {
     }
     
     private static func rawUrl(from url: String, enrichedParams: [EnrichedParameter]) -> String {
-        var rawUrl = url
+        var outcome = url
+        let shortRegex = "=[a-zA-Z0-9\"]+"
+        let regex = try! NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+=[a-zA-Z0-9\"]+\}"#, options: [])
+        let matchesCount = regex.matches(in: url, range: .init(location: 0, length: url.count)).count
         
-        enrichedParams.forEach { param in
-            guard let paramValue = param.value else { return }
-            rawUrl = rawUrl.replacingOccurrences(of: paramValue, with: "")
+        (0 ..< matchesCount).forEach { _ in
+            guard let match = regex.firstMatch(in: outcome, range: .init(location: 0, length: outcome.count)),
+                  let matchRange = Range(match.range) else {
+                return
+            }
+            
+            let startIndex = outcome.index(outcome.startIndex, offsetBy: matchRange.lowerBound)
+            let endIndex = outcome.index(outcome.startIndex, offsetBy: matchRange.upperBound)
+            let range = startIndex ..< endIndex
+            outcome = outcome
+                .replacingOccurrences(of: shortRegex, with: "", options: .regularExpression, range: range)
         }
         
-        return rawUrl.replacingOccurrences(of: "=", with: "")
+        return outcome
     }
 }
