@@ -174,7 +174,7 @@ service.addBeforeSendingBlock(for: "my/path/{id}/content") { urlRequest in
 To add `addBeforeSendingBlock` or `addOnResponseBlock` for ALL requests, do it like:
 
 ```Swift
-service.addBeforeSendingBlock { data, httpUrlResponse in
+service.addOnResponseBlock { data, httpUrlResponse in
     // some operations
     return data
 }
@@ -208,6 +208,8 @@ let result = try await mock.getPosts()
 
 XCTAssertTrue(result.isEmpty)
 ```
+
+Note that mocked methods will directly return stubbed result without accessing Snowdrop.Core so your beforeSend and onResponse blocks won't be called.
 
 ## Acknowledgements
 

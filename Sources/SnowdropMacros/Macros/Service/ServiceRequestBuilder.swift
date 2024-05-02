@@ -28,32 +28,20 @@ struct ServiceRequestBuilder: ClassMethodBodyBuilderProtocol {
     }
     
     static func build(details: FuncBodyDetails) -> String {
+        let variableType = details.body?.key != nil ? "var" : "let"
         var requestImpl = """
         
-            if !_queryItems.isEmpty {
-                var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
-                components.queryItems = _queryItems.map {
-                    $0.toUrlQueryItem()
-                }
-                url = components.url!
-            }
-        
-            var request = URLRequest(url: url)
-        
-            request.httpMethod = "\(details.method)"
-        
-            headers.forEach { key, value in
-                request.addValue("\\(value)", forHTTPHeaderField: key)
-            }\n\n
+            \(variableType) request = prepareBasicRequest(url: url, method: "\(details.method)", queryItems: _queryItems, headers: headers)\n
         """
         
         if details.isUploadingFile, let body = details.body?.key {
             requestImpl += """
+            
                 if (headers["Content-Type"] as? String) == nil {
                     request.addValue("multipart/form-data", forHTTPHeaderField: "Content-Type")
                 }
             
-                request.httpBody = Snowdrop.core.dataWithBoundary(\(body), payloadDescription: _payloadDescription)\n\n
+                request.httpBody = Snowdrop.core.dataWithBoundary(\(body), payloadDescription: _payloadDescription)\n
             """
         } else if let body = details.body?.key {
             requestImpl += """
@@ -65,12 +53,13 @@ struct ServiceRequestBuilder: ClassMethodBodyBuilderProtocol {
                     data = Snowdrop.core.prepareBody(data: \(body))
                 }
             
-                request.httpBody = data\n\n
+                request.httpBody = data\n
             """
         }
         
         if let _ = details.returnType {
             requestImpl += """
+                
                 return try\(details.doesThrow ? "" : "?") await Snowdrop.core.performRequestAndDecode(
                     request,
                     rawUrl: rawUrl,

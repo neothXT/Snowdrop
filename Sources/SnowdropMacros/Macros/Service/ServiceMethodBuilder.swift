@@ -32,7 +32,7 @@ struct ServiceMethodBuilder: ClassMethodBuilderProtocol  {
     private static func generateBody(details: FuncBodyDetails) -> String {
         """
         {
-            var url = baseUrl.appendingPathComponent("\(details.url)")
+            let url = baseUrl.appendingPathComponent("\(details.url)")
             let rawUrl = baseUrl.appendingPathComponent("\(details.rawUrl)").absoluteString
             let headers: [String: Any] = \(details.headers)
             \(ServiceRequestBuilder.build(details: details))

@@ -61,26 +61,11 @@ final class SnowdropMacrosTests: XCTestCase {
                 }
 
                 func getPosts(for id: Int = 2, model: Model, _queryItems: [QueryItem]) async throws -> Post {
-                    var url = baseUrl.appendingPathComponent("/posts/\\(id)/comments")
+                    let url = baseUrl.appendingPathComponent("/posts/\\(id)/comments")
                     let rawUrl = baseUrl.appendingPathComponent("/posts/{id}/comments").absoluteString
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
-                    if !_queryItems.isEmpty {
-                        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
-                        components.queryItems = _queryItems.map {
-                            $0.toUrlQueryItem()
-                        }
-                        url = components.url!
-                    }
-            
-                    var request = URLRequest(url: url)
-            
-                    request.httpMethod = "GET"
-            
-                    headers.forEach { key, value in
-                        request.addValue("\\(value)", forHTTPHeaderField: key)
-                    }
-            
+                    var request = prepareBasicRequest(url: url, method: "GET", queryItems: _queryItems, headers: headers)
                     var data: Data?
             
                     if let header = headers["Content-Type"] as? String, header == "application/x-www-form-urlencoded" {
@@ -97,6 +82,27 @@ final class SnowdropMacrosTests: XCTestCase {
                         requestBlocks: requestBlocks,
                         responseBlocks: responseBlocks
                     )
+                }
+            
+                private func prepareBasicRequest(url: URL, method: String, queryItems: [QueryItem], headers: [String: Any]) -> URLRequest {
+                    var finalUrl = url
+
+                    if !queryItems.isEmpty {
+                        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+                        components.queryItems = queryItems.map {
+                            $0.toUrlQueryItem()
+                        }
+                        finalUrl = components.url!
+                    }
+
+                    var request = URLRequest(url: finalUrl)
+                    request.httpMethod = method
+
+                    headers.forEach { key, value in
+                        request.addValue("\\(value)", forHTTPHeaderField: key)
+                    }
+
+                    return request
                 }
             }
             """,
@@ -162,26 +168,12 @@ final class SnowdropMacrosTests: XCTestCase {
                 }
             
                 public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
-                    var url = baseUrl.appendingPathComponent("/file")
+                    let url = baseUrl.appendingPathComponent("/file")
                     let rawUrl = baseUrl.appendingPathComponent("/file").absoluteString
                     let headers: [String: Any] = [:]
             
-                    if !_queryItems.isEmpty {
-                        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
-                        components.queryItems = _queryItems.map {
-                            $0.toUrlQueryItem()
-                        }
-                        url = components.url!
-                    }
-            
-                    var request = URLRequest(url: url)
-            
-                    request.httpMethod = "POST"
-            
-                    headers.forEach { key, value in
-                        request.addValue("\\(value)", forHTTPHeaderField: key)
-                    }
-            
+                    var request = prepareBasicRequest(url: url, method: "POST", queryItems: _queryItems, headers: headers)
+
                     if (headers["Content-Type"] as? String) == nil {
                         request.addValue("multipart/form-data", forHTTPHeaderField: "Content-Type")
                     }
@@ -194,6 +186,27 @@ final class SnowdropMacrosTests: XCTestCase {
                         requestBlocks: requestBlocks,
                         responseBlocks: responseBlocks
                     )
+                }
+            
+                private func prepareBasicRequest(url: URL, method: String, queryItems: [QueryItem], headers: [String: Any]) -> URLRequest {
+                    var finalUrl = url
+
+                    if !queryItems.isEmpty {
+                        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+                        components.queryItems = queryItems.map {
+                            $0.toUrlQueryItem()
+                        }
+                        finalUrl = components.url!
+                    }
+
+                    var request = URLRequest(url: finalUrl)
+                    request.httpMethod = method
+
+                    headers.forEach { key, value in
+                        request.addValue("\\(value)", forHTTPHeaderField: key)
+                    }
+
+                    return request
                 }
             }
             """,
@@ -262,6 +275,27 @@ final class SnowdropMacrosTests: XCTestCase {
             
                 public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
                     try uploadFileResult.get()
+                }
+            
+                private func prepareBasicRequest(url: URL, method: String, queryItems: [QueryItem], headers: [String: Any]) -> URLRequest {
+                    var finalUrl = url
+
+                    if !queryItems.isEmpty {
+                        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+                        components.queryItems = queryItems.map {
+                            $0.toUrlQueryItem()
+                        }
+                        finalUrl = components.url!
+                    }
+
+                    var request = URLRequest(url: finalUrl)
+                    request.httpMethod = method
+
+                    headers.forEach { key, value in
+                        request.addValue("\\(value)", forHTTPHeaderField: key)
+                    }
+
+                    return request
                 }
             }
             """,
