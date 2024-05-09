@@ -37,5 +37,15 @@ struct MockableRequestBuilder: ClassMethodBodyBuilderProtocol {
         try\(doesThrow ? "" : "?") \(funcName)Result.get()
         """
     }
+    
+    static func buildNonReturnable(funcName: String, doesThrow: Bool) -> String {
+        guard doesThrow else { return "/* NOP */" }
+        return """
+        guard let \(funcName)Result else { 
+                return
+            }
+            throw \(funcName)Result
+        """
+    }
 }
 

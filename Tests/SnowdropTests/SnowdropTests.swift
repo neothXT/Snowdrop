@@ -96,4 +96,14 @@ final class SnowdropTests: XCTestCase {
             XCTAssertTrue(snowdropError.type == .emptyResponse)
         }
     }
+    
+    func testNonReturnableThrowableMock() async throws {
+        mock.getNoResponsePostsResult = SnowdropError(type: .authenticationFailed)
+        do {
+            let _ = try await mock.getNoResponsePosts()
+        } catch {
+            let snowdropError = try XCTUnwrap(error as? SnowdropError)
+            XCTAssertTrue(snowdropError.type == .authenticationFailed)
+        }
+    }
 }

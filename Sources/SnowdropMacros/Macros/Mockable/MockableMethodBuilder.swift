@@ -29,7 +29,7 @@ struct MockableMethodBuilder: ClassMethodBuilderProtocol  {
         guard doesReturn else {
             return """
             {
-                /* NOP */
+                \(MockableRequestBuilder.buildNonReturnable(funcName: funcName, doesThrow: doesThrow))
             }
             """
         }

@@ -42,7 +42,7 @@ public protocol TestEndpoint {
     func getNonThrowingPosts() async -> [Post]?
     
     @GET(url: "posts")
-    func getNoResponsePosts() async
+    func getNoResponsePosts() async throws
 }
 
 

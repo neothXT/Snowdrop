@@ -35,11 +35,16 @@ public struct MockableMacro: PeerMacro {
 
         let functionResults: String = decl.memberBlock.members.compactMap { member -> String? in
             guard let fDecl = member.decl.as(FunctionDeclSyntax.self),
-                  let returnType = fDecl.signature.returnClause?.type.description else {
+                  let doesThrow = fDecl.signature.effectSpecifiers?.description.contains("throw"),
+                  doesThrow || !(fDecl.signature.returnClause?.type.description.isEmpty ?? true) else {
                 return nil
             }
             
             let funcName = fDecl.name.text
+            guard let returnType = fDecl.signature.returnClause?.type.description else {
+                return "\(accessModifier)var \(funcName)Result: Error?"
+            }
+            
             return "\(accessModifier)var \(funcName)Result: Result<\(returnType), Error> = .failure(SnowdropError(type: .unknown))"
         }.joined(separator: "\n")
         
