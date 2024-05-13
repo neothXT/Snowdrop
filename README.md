@@ -162,7 +162,7 @@ When inserting `String` default values such as {name="Some name"}, it is strongl
 
 Each service provides two methods to add interception blocks - `addBeforeSendingBlock` and `addOnResponseBlock`. Both accept arguments such as `path` of type `String` and `block` which is closure.
 
-To add `addBeforeSendingBlock` or `addOnResponseBlock` for a request with pathVariables, do it like:
+To add `addBeforeSendingBlock` or `addOnResponseBlock` for a request with pathVariables, you should use path pattern. That means, regardless if your path is like "my/path/{id}/content" or "my/path/{id=4}/content" - you should provide it like:
 
 ```Swift
 service.addBeforeSendingBlock(for: "my/path/{id}/content") { urlRequest in
