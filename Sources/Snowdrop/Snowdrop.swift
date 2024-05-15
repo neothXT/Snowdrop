@@ -18,7 +18,7 @@ public struct Snowdrop {
 // MARK: Config
 
 public extension Snowdrop {
-    struct Config {
+    final class Config {
         public var urlsExcludedFromPinning: [String] = []
         public var defaultJSONDecoder: JSONDecoder = .init()
         
