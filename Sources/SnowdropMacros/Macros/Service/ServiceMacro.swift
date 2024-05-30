@@ -33,6 +33,6 @@ public struct ServiceMacro: PeerMacro {
             return function
         }.joined(separator: "\n\n")
         
-        return [ClassBuilder.printOutcome(type: .service, accessModifier: accessModifier, name: name, functions: functions)]
+        return [ClassBuilder.build(type: .service, accessModifier: accessModifier, name: name, functions: functions)]
     }
 }

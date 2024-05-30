@@ -1,6 +1,6 @@
 //
 //  DataModels.swift
-//  
+//  Snowdrop
 //
 //  Created by Maciej Burdzicki on 26/04/2024.
 //

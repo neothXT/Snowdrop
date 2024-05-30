@@ -12,9 +12,8 @@ Meet Snowdrop - type-safe, easy to use framework powered by Swift Macros created
     - [Service Declaration](#service-declaration)
     - [Request Execution](#request-execution)
 - [Advanced Usage](#advanced-usage)
-    - [Configuration](#configuration)
-        - [Default JSON Decoder](#default-json-decoder)
-        - [SSL/Certificate Pinning](#sslcertificate-pinning)
+    - [Default JSON Decoder](#default-json-decoder)
+    - [SSL/Certificate Pinning](#sslcertificate-pinning)
     - [Body Argument](#body-argument)
     - [File Upload](#file-upload)
     - [Query Parameters](#query-parameters)
@@ -93,18 +92,22 @@ let post = try await getPost(id: 7)
 
 ## Advanced Usage
 
-### Configuration
-
-Snowdrop's config allows you to set/change framework's global settings.
-
 ### Default JSON Decoder
 
-If you need to change default json decoder, you can set your own decoder to `Snowdrop.Config.defaultJSONDecoder`.
+If you need to change default json decoder, you can set your own decoder when creating an instance of your service.
+
+```Swift
+let decoder = CustomJSONDecoder()
+let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!, decoder: decoder)
+```
 
 #### SSL/Certificate Pinning
 
-To enable SSL/Certificate Pinning all you need to do is to include your certificate in the project.
-Then, if you want to exclude some URLs from SSL/Certificate pinning, add them to `Snowdrop.Config.urlsExcludedFromPinning`.
+Snowdrop offers SSL/Certificate pinning functionality when executing network requests. You can turn it on/off when creating an instance of your service. You can also determine urls that should be excluded from pinning.
+
+```Swift
+let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!, pinningMode: .ssl, urlsExcludedFromPinning: ["https://my-endpoint.com/about"])
+```
 
 ### Body Argument
 

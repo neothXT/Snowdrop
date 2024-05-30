@@ -10,14 +10,16 @@ import Combine
 
 public class SessionDelegate: NSObject, URLSessionDelegate {
 	private let certExplorer = CertificateExplorer()
+    private let mode: PinningMode?
 	private let excludedURLs: [String]
 	
 	private lazy var pinnedCerts = certExplorer.fetchCertificates()
 	private lazy var pinnedKeys = certExplorer.fetchSLLKeys()
-	
-	public init(excludedURLs: [String]) {
-		self.excludedURLs = excludedURLs
-	}
+    
+    public init(mode: PinningMode?, excludedURLs: [String]) {
+        self.excludedURLs = excludedURLs
+        self.mode = mode
+    }
 	
 	public func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
 		
@@ -59,6 +61,11 @@ public class SessionDelegate: NSObject, URLSessionDelegate {
 	}
 	
 	private func challengeCertificateIfNeeded(trust: SecTrust, completionHandler: @escaping (ChallengeResult, Bool) -> Void) {
+        guard let mode, mode.contains(.certificate) else {
+            completionHandler(.ignored, false)
+            return
+        }
+        
 		guard let serverCert = SecTrustGetCertificateAtIndex(trust, 0) else {
 			completionHandler(.failure, true)
 			return
@@ -68,6 +75,11 @@ public class SessionDelegate: NSObject, URLSessionDelegate {
 	}
 	
 	private func challengeKeyIfNeeded(trust: SecTrust, completionHandler: @escaping (ChallengeResult, Bool) -> Void) {
+        guard let mode, mode.contains(.ssl) else {
+            completionHandler(.ignored, false)
+            return
+        }
+        
 		guard let serverCert = SecTrustGetCertificateAtIndex(trust, 0),
 			  let key = certExplorer.publicKey(for: serverCert) else {
 			completionHandler(.failure, true)

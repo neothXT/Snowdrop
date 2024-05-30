@@ -1,6 +1,6 @@
 //
 //  ClassBuilder.swift
-//
+//  Snowdrop
 //
 //  Created by Maciej Burdzicki on 26/04/2024.
 //
@@ -13,16 +13,28 @@ enum ClassType: String {
 }
 
 struct ClassBuilder {
-    static func printOutcome(type: ClassType, accessModifier: String, name: String, functions: String) -> DeclSyntax {
+    static func build(type: ClassType, accessModifier: String, name: String, functions: String) -> DeclSyntax {
                 """
                 \(raw: accessModifier)class \(raw: name)\(raw: type.rawValue): \(raw: name), Service {
+                    private let decoder: JSONDecoder
+                    private let pinningMode: PinningMode?
+                    private let urlsExcludedFromPinning: [String]
+                
                     \(raw: accessModifier)let baseUrl: URL
                 
                     \(raw: accessModifier)var requestBlocks: [String: RequestHandler] = [:]
                     \(raw: accessModifier)var responseBlocks: [String: ResponseHandler] = [:]
                 
-                    \(raw: accessModifier)required init(baseUrl: URL) {
+                    \(raw: accessModifier)required init(
+                        baseUrl: URL,
+                        pinningMode: PinningMode? = nil,
+                        urlsExcludedFromPinning: [String] = [],
+                        decoder: JSONDecoder = .init()
+                    ) {
                         self.baseUrl = baseUrl
+                        self.pinningMode = pinningMode
+                        self.urlsExcludedFromPinning = urlsExcludedFromPinning
+                        self.decoder = decoder
                     }
                 
                     \(raw: accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {

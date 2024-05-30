@@ -1,6 +1,6 @@
 //
 //  MockableMacro.swift
-//
+//  Snowdrop
 //
 //  Created by Maciej Burdzicki on 26/04/2024.
 //
@@ -52,7 +52,7 @@ public struct MockableMacro: PeerMacro {
         
         return [
             """
-            \(raw: ClassBuilder.printOutcome(type: .mock, accessModifier: accessModifier, name: name, functions: functionsAndResults))
+            \(raw: ClassBuilder.build(type: .mock, accessModifier: accessModifier, name: name, functions: functionsAndResults))
             """
         ]
     }

@@ -14,10 +14,12 @@ public extension Snowdrop.Core {
     func performRequest(
         _ request: URLRequest,
         rawUrl: String,
+        pinning: PinningMode?,
+        urlsExcludedFromPinning: [String],
         requestBlocks: [String: RequestHandler],
         responseBlocks: [String: ResponseHandler]
     ) async throws -> (Data?, HTTPURLResponse) {
-        let session = Snowdrop.config.getSession()
+        let session = getSession(pinningMode: pinning, urlsExcludedFromPinning: urlsExcludedFromPinning)
         var data: Data?
         var urlResponse: URLResponse?
         
@@ -46,18 +48,23 @@ public extension Snowdrop.Core {
     func performRequestAndDecode<T: Codable>(
         _ request: URLRequest,
         rawUrl: String,
+        decoder: JSONDecoder,
+        pinning: PinningMode?,
+        urlsExcludedFromPinning: [String],
         requestBlocks: [String: RequestHandler],
         responseBlocks: [String: ResponseHandler]
     ) async throws -> T {
         let (data, response) = try await performRequest(
             request,
             rawUrl: rawUrl,
+            pinning: pinning,
+            urlsExcludedFromPinning: urlsExcludedFromPinning,
             requestBlocks: requestBlocks,
             responseBlocks: responseBlocks
         )
         
         guard let unwrappedData = data,
-              let decodedData = try? Snowdrop.config.defaultJSONDecoder.decode(T.self, from: unwrappedData) else {
+              let decodedData = try? decoder.decode(T.self, from: unwrappedData) else {
             throw SnowdropError(
                 type: .failedToMapResponse,
                 details: .init(
@@ -71,6 +78,13 @@ public extension Snowdrop.Core {
         }
         
         return decodedData
+    }
+    
+    private func getSession(pinningMode: PinningMode?, urlsExcludedFromPinning: [String]) -> URLSession {
+        let operationQueue = OperationQueue()
+        operationQueue.qualityOfService = .utility
+        let delegate = SessionDelegate(mode: pinningMode, excludedURLs: urlsExcludedFromPinning)
+        return URLSession(configuration: .default, delegate: delegate, delegateQueue: operationQueue)
     }
     
     private func handleError(_ error: NSError) throws {

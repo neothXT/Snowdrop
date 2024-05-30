@@ -11,19 +11,7 @@ public typealias RequestHandler = (URLRequest) -> URLRequest
 public typealias ResponseHandler = (Data, HTTPURLResponse) -> (Data)
 
 public struct Snowdrop {
-    public static let config = Config()
     public static let core = Core()
-}
-
-// MARK: Config
-
-public extension Snowdrop {
-    final class Config {
-        public var urlsExcludedFromPinning: [String] = []
-        public var defaultJSONDecoder: JSONDecoder = .init()
-        
-        fileprivate init() { /* NOP */ }
-    }
 }
 
 // MARK: Core

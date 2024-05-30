@@ -44,5 +44,3 @@ public protocol TestEndpoint {
     @GET(url: "posts")
     func getNoResponsePosts() async throws
 }
-
-

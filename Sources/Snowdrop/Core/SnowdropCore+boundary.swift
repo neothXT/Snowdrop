@@ -1,6 +1,6 @@
 //
 //  SnowdropCore+boundary.swift
-//  
+//  Snowdrop
 //
 //  Created by Maciej Burdzicki on 21/04/2024.
 //
