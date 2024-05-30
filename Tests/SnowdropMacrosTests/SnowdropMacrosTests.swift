@@ -30,14 +30,14 @@ final class SnowdropMacrosTests: XCTestCase {
             }
             
             class TestEndpointService: TestEndpoint, Service {
-                private let decoder: JSONDecoder
-                private let pinningMode: PinningMode?
-                private let urlsExcludedFromPinning: [String]
-            
                 let baseUrl: URL
             
                 var requestBlocks: [String: RequestHandler] = [:]
                 var responseBlocks: [String: ResponseHandler] = [:]
+            
+                var decoder: JSONDecoder
+                var pinningMode: PinningMode?
+                var urlsExcludedFromPinning: [String]
             
                 required init(
                     baseUrl: URL,
@@ -149,14 +149,14 @@ final class SnowdropMacrosTests: XCTestCase {
             }
             
             public class TestEndpointService: TestEndpoint, Service {
-                private let decoder: JSONDecoder
-                private let pinningMode: PinningMode?
-                private let urlsExcludedFromPinning: [String]
-            
                 public let baseUrl: URL
             
                 public var requestBlocks: [String: RequestHandler] = [:]
                 public var responseBlocks: [String: ResponseHandler] = [:]
+            
+                public var decoder: JSONDecoder
+                public var pinningMode: PinningMode?
+                public var urlsExcludedFromPinning: [String]
             
                 public required init(
                     baseUrl: URL,
@@ -268,14 +268,14 @@ final class SnowdropMacrosTests: XCTestCase {
             }
             
             public class TestEndpointServiceMock: TestEndpoint, Service {
-                private let decoder: JSONDecoder
-                private let pinningMode: PinningMode?
-                private let urlsExcludedFromPinning: [String]
-            
                 public let baseUrl: URL
             
                 public var requestBlocks: [String: RequestHandler] = [:]
                 public var responseBlocks: [String: ResponseHandler] = [:]
+            
+                public var decoder: JSONDecoder
+                public var pinningMode: PinningMode?
+                public var urlsExcludedFromPinning: [String]
             
                 public required init(
                     baseUrl: URL,

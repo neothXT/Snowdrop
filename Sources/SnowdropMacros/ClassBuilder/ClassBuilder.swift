@@ -16,14 +16,14 @@ struct ClassBuilder {
     static func build(type: ClassType, accessModifier: String, name: String, functions: String) -> DeclSyntax {
                 """
                 \(raw: accessModifier)class \(raw: name)\(raw: type.rawValue): \(raw: name), Service {
-                    private let decoder: JSONDecoder
-                    private let pinningMode: PinningMode?
-                    private let urlsExcludedFromPinning: [String]
-                
                     \(raw: accessModifier)let baseUrl: URL
                 
                     \(raw: accessModifier)var requestBlocks: [String: RequestHandler] = [:]
                     \(raw: accessModifier)var responseBlocks: [String: ResponseHandler] = [:]
+                
+                    \(raw: accessModifier)var decoder: JSONDecoder
+                    \(raw: accessModifier)var pinningMode: PinningMode?
+                    \(raw: accessModifier)var urlsExcludedFromPinning: [String]
                 
                     \(raw: accessModifier)required init(
                         baseUrl: URL,

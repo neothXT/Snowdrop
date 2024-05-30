@@ -44,3 +44,15 @@ public protocol TestEndpoint {
     @GET(url: "posts")
     func getNoResponsePosts() async throws
 }
+
+class MyRepository {
+  private let baseURL = URL(string: "https://my-url.com/api/")!
+  let service: TestEndpoint & Service
+
+  init() {
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+    
+    service = TestEndpointService(baseUrl: baseURL)
+  }
+}
