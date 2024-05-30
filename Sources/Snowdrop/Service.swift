@@ -12,6 +12,10 @@ public protocol Service {
 
     var requestBlocks: [String: RequestHandler] { get set }
     var responseBlocks: [String: ResponseHandler] { get set }
+    
+    var decoder: JSONDecoder { get set }
+    var pinningMode: PinningMode? { get set }
+    var urlsExcludedFromPinning: [String] { get set }
 
     init(baseUrl: URL,
          pinningMode: PinningMode?,
