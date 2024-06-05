@@ -28,6 +28,7 @@ public extension Snowdrop.Core {
         
         do {
             (data, urlResponse) = try await session.data(for: finalRequest)
+            session.finishTasksAndInvalidate()
         } catch {
             try handleError(error as NSError)
         }
