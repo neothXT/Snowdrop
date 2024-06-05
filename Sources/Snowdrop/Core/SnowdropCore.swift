@@ -63,21 +63,24 @@ public extension Snowdrop.Core {
             responseBlocks: responseBlocks
         )
         
-        guard let unwrappedData = data,
-              let decodedData = try? decoder.decode(T.self, from: unwrappedData) else {
+        guard let unwrappedData = data else {
+            throw SnowdropError(type: .unexpectedResponse)
+        }
+        
+        do {
+            let decodedData = try decoder.decode(T.self, from: unwrappedData)
+            return decodedData
+        } catch {
             throw SnowdropError(
                 type: .failedToMapResponse,
                 details: .init(
-                    statusCode: response.statusCode,
-                    localizedString: HTTPURLResponse.localizedString(forStatusCode: response.statusCode),
-                    url: response.url,
-                    mimeType: response.mimeType,
-                    headers: response.allHeaderFields),
+                    statusCode: -1,
+                    localizedString: error.localizedDescription,
+                    ogError: error
+                ),
                 data: data
             )
         }
-        
-        return decodedData
     }
     
     private func getSession(pinningMode: PinningMode?, urlsExcludedFromPinning: [String]) -> URLSession {
