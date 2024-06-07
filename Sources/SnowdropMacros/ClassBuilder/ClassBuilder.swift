@@ -8,14 +8,23 @@
 import SwiftSyntax
 
 enum ClassType: String {
-    case service = "Service"
-    case mock = "ServiceMock"
+    case service
+    case mock
+    
+    func suffix(for name: String) -> String {
+        switch self {
+        case .service:
+            name.lowercased().contains("service") ? "Impl" : "Service"
+        case .mock:
+            name.lowercased().contains("service") ? "Mock" : "ServiceMock"
+        }
+    }
 }
 
 struct ClassBuilder {
     static func build(type: ClassType, accessModifier: String, name: String, functions: String) -> DeclSyntax {
                 """
-                \(raw: accessModifier)class \(raw: name)\(raw: type.rawValue): \(raw: name), Service {
+                \(raw: accessModifier)class \(raw: name)\(raw: type.suffix(for: name)): \(raw: name), Service {
                     \(raw: accessModifier)let baseUrl: URL
                 
                     \(raw: accessModifier)var requestBlocks: [String: RequestHandler] = [:]

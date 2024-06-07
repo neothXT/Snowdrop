@@ -83,6 +83,8 @@ class MyEndpointService: MyEndpoint {
 }
 ```
 
+Please note that if your service protocol already have "Service" keyword like `MyEndpointService`, macro will then generate the class named `MyEndpointServiceImpl` instead.
+
 To send requests, just initialize `MyEndpointService` instance and call function corresponding to the request you want to execute.
 
 ```Swift
