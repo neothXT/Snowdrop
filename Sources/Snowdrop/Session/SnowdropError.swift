@@ -22,40 +22,19 @@ public struct SnowdropError: Error {
 
 public extension SnowdropError {
     enum ErrorType {
-        case failedToBuildRequest, failedToMapResponse, unexpectedResponse, authenticationFailed, notConnected, emptyResponse, conversionFailed, noInternetConnection, requestFinished, finishedWithoutValue, unknown
+        case failedToMapResponse, unexpectedResponse, noInternetConnection, unknown
     }
     
     var errorDescription: String? {
         switch type {
-        case .conversionFailed:
-            return "Conversion to AccessTokenConvertible failed."
-            
-        case .failedToBuildRequest:
-            return "Failed to build URLRequest. Please make sure the URL is correct."
-            
         case .failedToMapResponse:
             return "Failed to map response."
             
         case .unexpectedResponse:
             return "Unexpected response."
             
-        case .authenticationFailed:
-            return "Authentication failed."
-            
-        case .notConnected:
-            return "There's no active WebSocket connection."
-            
         case .noInternetConnection:
             return "Please check your internet connection."
-            
-        case .emptyResponse:
-            return "Empty response."
-            
-        case .requestFinished:
-            return "Request finished."
-            
-        case .finishedWithoutValue:
-            return "Request finished without value."
         
         case .unknown:
             return "Unknown"

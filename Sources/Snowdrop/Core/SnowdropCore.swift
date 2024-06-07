@@ -55,7 +55,7 @@ public extension Snowdrop.Core {
         requestBlocks: [String: RequestHandler],
         responseBlocks: [String: ResponseHandler]
     ) async throws -> T {
-        let (data, response) = try await performRequest(
+        let (data, _) = try await performRequest(
             request,
             rawUrl: rawUrl,
             pinning: pinning,

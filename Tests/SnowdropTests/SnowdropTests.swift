@@ -88,22 +88,22 @@ final class SnowdropTests: XCTestCase {
     }
     
     func testNegativeGetTaskMock() async throws {
-        mock.getPostResult = .failure(SnowdropError(type: .emptyResponse))
+        mock.getPostResult = .failure(SnowdropError(type: .unexpectedResponse))
         do {
             let _ = try await mock.getPost()
         } catch {
             let snowdropError = try XCTUnwrap(error as? SnowdropError)
-            XCTAssertTrue(snowdropError.type == .emptyResponse)
+            XCTAssertTrue(snowdropError.type == .unexpectedResponse)
         }
     }
     
     func testNonReturnableThrowableMock() async throws {
-        mock.getNoResponsePostsResult = SnowdropError(type: .authenticationFailed)
+        mock.getNoResponsePostsResult = SnowdropError(type: .failedToMapResponse)
         do {
             let _ = try await mock.getNoResponsePosts()
         } catch {
             let snowdropError = try XCTUnwrap(error as? SnowdropError)
-            XCTAssertTrue(snowdropError.type == .authenticationFailed)
+            XCTAssertTrue(snowdropError.type == .failedToMapResponse)
         }
     }
 }
