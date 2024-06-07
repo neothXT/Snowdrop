@@ -313,27 +313,6 @@ final class SnowdropMacrosTests: XCTestCase {
                 public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
                     try uploadFileResult.get()
                 }
-            
-                private func prepareBasicRequest(url: URL, method: String, queryItems: [QueryItem], headers: [String: Any]) -> URLRequest {
-                    var finalUrl = url
-
-                    if !queryItems.isEmpty {
-                        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
-                        components.queryItems = queryItems.map {
-                            $0.toUrlQueryItem()
-                        }
-                        finalUrl = components.url!
-                    }
-
-                    var request = URLRequest(url: finalUrl)
-                    request.httpMethod = method
-
-                    headers.forEach { key, value in
-                        request.addValue("\\(value)", forHTTPHeaderField: key)
-                    }
-
-                    return request
-                }
             }
             """,
             macros: [

@@ -48,32 +48,11 @@ struct ClassBuilder {
                         self.decoder = decoder
                     }
                 
-                    \(raw: ClassBuilder.buildBeforeSendingBlockFunc(for: type, accessModifier: accessModifier))
+                \(raw: ClassBuilder.buildBeforeSendingBlockFunc(for: type, accessModifier: accessModifier))
                     
-                    \(raw: ClassBuilder.buildOnResponseBlockFunc(for: type, accessModifier: accessModifier))
+                \(raw: ClassBuilder.buildOnResponseBlockFunc(for: type, accessModifier: accessModifier))
                 
-                \(raw: functions)
-                
-                    private func prepareBasicRequest(url: URL, method: String, queryItems: [QueryItem], headers: [String: Any]) -> URLRequest {
-                        var finalUrl = url
-                        
-                        if !queryItems.isEmpty {
-                            var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
-                            components.queryItems = queryItems.map {
-                                $0.toUrlQueryItem()
-                            }
-                            finalUrl = components.url!
-                        }
-                        
-                        var request = URLRequest(url: finalUrl)
-                        request.httpMethod = method
-                        
-                        headers.forEach { key, value in
-                            request.addValue("\\(value)", forHTTPHeaderField: key)
-                        }
-                        
-                        return request
-                    }
+                \(raw: functions + ClassBuilder.prepareBasicRequest(for: type))
                 }
                 """
     }
@@ -81,14 +60,14 @@ struct ClassBuilder {
     private static func buildBeforeSendingBlockFunc(for type: ClassType, accessModifier: String) -> String {
         guard type == .service else {
             return """
-            \(accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
+                \(accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
                     addBeforeSendingBlockCallsCount += 1
                 }
             """
         }
         
         return """
-        \(accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
+            \(accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
                 var key = "all"
                 if let path {
                     key = baseUrl.appending(path: path).absoluteString
@@ -101,20 +80,47 @@ struct ClassBuilder {
     private static func buildOnResponseBlockFunc(for type: ClassType, accessModifier: String) -> String {
         guard type == .service else {
             return """
-            \(accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
+                \(accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
                     addOnResponseBlockCallsCount += 1
                 }
             """
         }
         
         return """
-        \(accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
+            \(accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
                 var key = "all"
                 if let path {
                     key = baseUrl.appending(path: path).absoluteString
                 }
                 responseBlocks[key] = block
             }
+        """
+    }
+    
+    static private func prepareBasicRequest(for type: ClassType) -> String {
+        guard type == .service else { return "" }
+        
+        return """
+            \n\nprivate func prepareBasicRequest(url: URL, method: String, queryItems: [QueryItem], headers: [String: Any]) -> URLRequest {
+            var finalUrl = url
+            
+            if !queryItems.isEmpty {
+                var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+                components.queryItems = queryItems.map {
+                    $0.toUrlQueryItem()
+                }
+                finalUrl = components.url!
+            }
+            
+            var request = URLRequest(url: finalUrl)
+            request.httpMethod = method
+            
+            headers.forEach { key, value in
+                request.addValue("\\(value)", forHTTPHeaderField: key)
+            }
+            
+            return request
+        }
         """
     }
 }
