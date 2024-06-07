@@ -290,22 +290,17 @@ final class SnowdropMacrosTests: XCTestCase {
                 }
             
                 public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
-                    var key = "all"
-                    if let path {
-                        key = baseUrl.appending(path: path).absoluteString
-                    }
-                    requestBlocks[key] = block
+                    addBeforeSendingBlockCallsCount += 1
                 }
             
                 public func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
-                    var key = "all"
-                    if let path {
-                        key = baseUrl.appending(path: path).absoluteString
-                    }
-                    responseBlocks[key] = block
+                    addOnResponseBlockCallsCount += 1
                 }
             
                 public var uploadFileResult: Result<Post, Error> = .failure(SnowdropError(type: .unknown))
+            
+                public var addBeforeSendingBlockCallsCount = 0
+                public var addOnResponseBlockCallsCount = 0
             
                 public func uploadFile(file: UIImage) async throws -> Post {
                     let _queryItems: [QueryItem] = []

@@ -33,7 +33,7 @@ public struct MockableMacro: PeerMacro {
             return function
         }.joined(separator: "\n\n")
 
-        let functionResults: String = decl.memberBlock.members.compactMap { member -> String? in
+        var functionResults: String = decl.memberBlock.members.compactMap { member -> String? in
             guard let fDecl = member.decl.as(FunctionDeclSyntax.self),
                   let doesThrow = fDecl.signature.effectSpecifiers?.description.contains("throw"),
                   doesThrow || !(fDecl.signature.returnClause?.type.description.isEmpty ?? true) else {
@@ -47,6 +47,9 @@ public struct MockableMacro: PeerMacro {
             
             return "\(accessModifier)var \(funcName)Result: Result<\(returnType), Error> = .failure(SnowdropError(type: .unknown))"
         }.joined(separator: "\n")
+        
+        functionResults += "\n\n\(accessModifier)var addBeforeSendingBlockCallsCount = 0"
+        functionResults += "\n\(accessModifier)var addOnResponseBlockCallsCount = 0"
         
         let functionsAndResults = functionResults + "\n\n" + functions
         

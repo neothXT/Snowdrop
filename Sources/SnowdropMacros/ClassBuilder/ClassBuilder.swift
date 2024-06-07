@@ -22,6 +22,8 @@ enum ClassType: String {
 }
 
 struct ClassBuilder {
+    private init() { }
+    
     static func build(type: ClassType, accessModifier: String, name: String, functions: String) -> DeclSyntax {
                 """
                 \(raw: accessModifier)class \(raw: name)\(raw: type.suffix(for: name)): \(raw: name), Service {
@@ -46,21 +48,9 @@ struct ClassBuilder {
                         self.decoder = decoder
                     }
                 
-                    \(raw: accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
-                        var key = "all"
-                        if let path {
-                            key = baseUrl.appending(path: path).absoluteString
-                        }
-                        requestBlocks[key] = block
-                    }
+                    \(raw: ClassBuilder.buildBeforeSendingBlockFunc(for: type, accessModifier: accessModifier))
                     
-                    \(raw: accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
-                        var key = "all"
-                        if let path {
-                            key = baseUrl.appending(path: path).absoluteString
-                        }
-                        responseBlocks[key] = block
-                    }
+                    \(raw: ClassBuilder.buildOnResponseBlockFunc(for: type, accessModifier: accessModifier))
                 
                 \(raw: functions)
                 
@@ -86,5 +76,45 @@ struct ClassBuilder {
                     }
                 }
                 """
+    }
+    
+    private static func buildBeforeSendingBlockFunc(for type: ClassType, accessModifier: String) -> String {
+        guard type == .service else {
+            return """
+            \(accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
+                    addBeforeSendingBlockCallsCount += 1
+                }
+            """
+        }
+        
+        return """
+        \(accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
+                var key = "all"
+                if let path {
+                    key = baseUrl.appending(path: path).absoluteString
+                }
+                requestBlocks[key] = block
+            }
+        """
+    }
+    
+    private static func buildOnResponseBlockFunc(for type: ClassType, accessModifier: String) -> String {
+        guard type == .service else {
+            return """
+            \(accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
+                    addOnResponseBlockCallsCount += 1
+                }
+            """
+        }
+        
+        return """
+        \(accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
+                var key = "all"
+                if let path {
+                    key = baseUrl.appending(path: path).absoluteString
+                }
+                responseBlocks[key] = block
+            }
+        """
     }
 }
