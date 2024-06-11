@@ -51,7 +51,7 @@ final class SnowdropTests: XCTestCase {
     
     func testOnResponse() async throws {
         let expectation = expectation(description: "Should intercept response")
-        service.addOnResponseBlock(for: "posts/{id}/comments") { data, urlResponse in
+        service.addOnResponseBlock(for: "posts/.{1,}/comments") { data, urlResponse in
             if urlResponse.statusCode == 200 && urlResponse.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/9/comments" {
                 expectation.fulfill()
             }
@@ -64,7 +64,7 @@ final class SnowdropTests: XCTestCase {
     
     func testOnResponseWithMultipleVariables() async throws {
         let expectation = expectation(description: "Should intercept response")
-        service.addOnResponseBlock(for: "/posts/{id}/comments/{commentId}") { data, urlResponse in
+        service.addOnResponseBlock(for: "/posts/9/comments/[0-9]{1,}") { data, urlResponse in
             if urlResponse.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/9/comments/6" {
                 expectation.fulfill()
             }

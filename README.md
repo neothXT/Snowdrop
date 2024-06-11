@@ -2,7 +2,7 @@
 
 # Snowdrop
 
-Meet Snowdrop - type-safe, easy to use framework powered by Swift Macros created to let you build and maintain complex network requests with ease.
+Meet **Snowdrop** - type-safe, easy to use framework powered by Swift Macros created to let you build and maintain complex network requests with ease.
 
 ## Navigation
 
@@ -83,7 +83,7 @@ class MyEndpointService: MyEndpoint {
 }
 ```
 
-Please note that if your service protocol already have "Service" keyword like `MyEndpointService`, macro will then generate the class named `MyEndpointServiceImpl` instead.
+**Please note that if your service protocol already have "Service" keyword like `MyEndpointService`, macro will then generate the class named `MyEndpointServiceImpl` instead.**
 
 To send requests, just initialize `MyEndpointService` instance and call function corresponding to the request you want to execute.
 
@@ -167,10 +167,10 @@ When inserting `String` default values such as {name="Some name"}, it is strongl
 
 Each service provides two methods to add interception blocks - `addBeforeSendingBlock` and `addOnResponseBlock`. Both accept arguments such as `path` of type `String` and `block` which is closure.
 
-To add `addBeforeSendingBlock` or `addOnResponseBlock` for a request with pathVariables, you should use path pattern. That means, regardless if your path is like "my/path/{id}/content" or "my/path/{id=4}/content" - you should provide it like:
+To add `addBeforeSendingBlock` or `addOnResponseBlock` for a requests matching certain path, use regular expressions like:
 
 ```Swift
-service.addBeforeSendingBlock(for: "my/path/{id}/content") { urlRequest in
+service.addBeforeSendingBlock(for: "my/path/[0-9]{1,}/content") { urlRequest in
     // some operations
     return urlRequest
 }
@@ -185,7 +185,7 @@ service.addOnResponseBlock { data, httpUrlResponse in
 }
 ```
 
-Note that if you add interception block for a certain request path, general interceptors will be ignored.
+**Note that if you add interception block for a certain request path, general interceptors will be ignored.**
 
 ### Mockable
 
@@ -214,7 +214,7 @@ let result = try await mock.getPosts()
 XCTAssertTrue(result.isEmpty)
 ```
 
-Note that mocked methods will directly return stubbed result without accessing Snowdrop.Core so your beforeSend and onResponse blocks won't be called.
+**Note that mocked methods will directly return stubbed result without accessing Snowdrop.Core so your beforeSend and onResponse blocks won't be called.**
 
 ## Acknowledgements
 

@@ -18,7 +18,6 @@ struct FuncDetails {
 
 struct FuncBodyDetails {
     let url: String
-    let rawUrl: String
     let method: String
     let headers: String
     let body: EnrichedParameter?

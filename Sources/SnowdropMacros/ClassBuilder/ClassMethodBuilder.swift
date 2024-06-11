@@ -74,7 +74,6 @@ extension ClassMethodBuilderProtocol {
 
         return .init(
             url: try escape(url),
-            rawUrl: rawUrl(from: url, enrichedParams: enrichedParams),
             method: method,
             headers: passedArguments.headers ?? "[:]",
             body: body,
@@ -109,25 +108,25 @@ extension ClassMethodBuilderProtocol {
         return outcome
     }
     
-    private static func rawUrl(from url: String, enrichedParams: [EnrichedParameter]) -> String {
-        var outcome = url
-        let shortRegex = "=[a-zA-Z0-9\"]+"
-        let regex = try! NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+=[a-zA-Z0-9\"]+\}"#, options: [])
-        let matchesCount = regex.matches(in: url, range: .init(location: 0, length: url.count)).count
-        
-        (0 ..< matchesCount).forEach { _ in
-            guard let match = regex.firstMatch(in: outcome, range: .init(location: 0, length: outcome.count)),
-                  let matchRange = Range(match.range) else {
-                return
-            }
-            
-            let startIndex = outcome.index(outcome.startIndex, offsetBy: matchRange.lowerBound)
-            let endIndex = outcome.index(outcome.startIndex, offsetBy: matchRange.upperBound)
-            let range = startIndex ..< endIndex
-            outcome = outcome
-                .replacingOccurrences(of: shortRegex, with: "", options: .regularExpression, range: range)
-        }
-        
-        return outcome
-    }
+//    private static func rawUrl(from url: String, enrichedParams: [EnrichedParameter]) -> String {
+//        var outcome = url
+//        let shortRegex = "=[a-zA-Z0-9\"]+"
+//        let regex = try! NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+=[a-zA-Z0-9\"]+\}"#, options: [])
+//        let matchesCount = regex.matches(in: url, range: .init(location: 0, length: url.count)).count
+//        
+//        (0 ..< matchesCount).forEach { _ in
+//            guard let match = regex.firstMatch(in: outcome, range: .init(location: 0, length: outcome.count)),
+//                  let matchRange = Range(match.range) else {
+//                return
+//            }
+//            
+//            let startIndex = outcome.index(outcome.startIndex, offsetBy: matchRange.lowerBound)
+//            let endIndex = outcome.index(outcome.startIndex, offsetBy: matchRange.upperBound)
+//            let range = startIndex ..< endIndex
+//            outcome = outcome
+//                .replacingOccurrences(of: shortRegex, with: "", options: .regularExpression, range: range)
+//        }
+//        
+//        return outcome
+//    }
 }

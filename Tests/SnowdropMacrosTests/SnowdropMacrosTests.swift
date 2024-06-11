@@ -74,7 +74,6 @@ final class SnowdropMacrosTests: XCTestCase {
 
                 func getPosts(for id: Int = 2, model: Model, _queryItems: [QueryItem]) async throws -> Post {
                     let url = baseUrl.appendingPathComponent("/posts/\\(id)/comments")
-                    let rawUrl = baseUrl.appendingPathComponent("/posts/{id}/comments").absoluteString
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
                     var request = prepareBasicRequest(url: url, method: "GET", queryItems: _queryItems, headers: headers)
@@ -90,7 +89,6 @@ final class SnowdropMacrosTests: XCTestCase {
             
                     return try await Snowdrop.core.performRequestAndDecode(
                         request,
-                        rawUrl: rawUrl,
                         decoder: decoder,
                         pinning: pinningMode,
                         urlsExcludedFromPinning: urlsExcludedFromPinning,
@@ -196,7 +194,6 @@ final class SnowdropMacrosTests: XCTestCase {
             
                 public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
                     let url = baseUrl.appendingPathComponent("/file")
-                    let rawUrl = baseUrl.appendingPathComponent("/file").absoluteString
                     let headers: [String: Any] = [:]
             
                     var request = prepareBasicRequest(url: url, method: "POST", queryItems: _queryItems, headers: headers)
@@ -209,7 +206,6 @@ final class SnowdropMacrosTests: XCTestCase {
             
                     return try await Snowdrop.core.performRequestAndDecode(
                         request,
-                        rawUrl: rawUrl,
                         decoder: decoder,
                         pinning: pinningMode,
                         urlsExcludedFromPinning: urlsExcludedFromPinning,

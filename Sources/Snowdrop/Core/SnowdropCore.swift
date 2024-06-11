@@ -13,7 +13,6 @@ public extension Snowdrop.Core {
     @discardableResult
     func performRequest(
         _ request: URLRequest,
-        rawUrl: String,
         pinning: PinningMode?,
         urlsExcludedFromPinning: [String],
         requestBlocks: [String: RequestHandler],
@@ -24,7 +23,7 @@ public extension Snowdrop.Core {
         var urlResponse: URLResponse?
         
         var finalRequest = request
-        applyRequestBlocks(requestBlocks, for: &finalRequest, rawUrl: rawUrl)
+        applyRequestBlocks(requestBlocks, for: &finalRequest)
         
         do {
             (data, urlResponse) = try await session.data(for: finalRequest)
@@ -41,14 +40,13 @@ public extension Snowdrop.Core {
             return (data, response)
         }
         
-        applyResponseBlocks(responseBlocks, forData: &finalData, response: &response, rawUrl: rawUrl)
+        applyResponseBlocks(responseBlocks, forData: &finalData, response: &response)
         
         return (finalData, response)
     }
     
     func performRequestAndDecode<T: Codable>(
         _ request: URLRequest,
-        rawUrl: String,
         decoder: JSONDecoder,
         pinning: PinningMode?,
         urlsExcludedFromPinning: [String],
@@ -57,7 +55,6 @@ public extension Snowdrop.Core {
     ) async throws -> T {
         let (data, _) = try await performRequest(
             request,
-            rawUrl: rawUrl,
             pinning: pinning,
             urlsExcludedFromPinning: urlsExcludedFromPinning,
             requestBlocks: requestBlocks,
@@ -111,11 +108,17 @@ public extension Snowdrop.Core {
 extension Snowdrop.Core {
     private func applyRequestBlocks(
         _ blocks: [String: RequestHandler],
-        for request: inout URLRequest,
-        rawUrl: String
+        for request: inout URLRequest
     ) {
-        var pathBlocks = blocks.filter { $0.key == rawUrl }.values
-        
+        var pathBlocks = blocks.filter {
+            guard let urlString = request.url?.absoluteString,
+                  let escapedKey = $0.key.removingPercentEncoding,
+                  let regex = try? NSRegularExpression(pattern: escapedKey) else {
+                return false
+            }
+            return regex.matches(in: urlString, range: .init(location: 0, length: urlString.count)).count == 1
+        }.values
+
         if pathBlocks.isEmpty {
             pathBlocks = blocks.filter { $0.key == "all" }.values
         }
@@ -128,10 +131,16 @@ extension Snowdrop.Core {
     private func applyResponseBlocks(
         _ blocks: [String: ResponseHandler],
         forData data: inout Data,
-        response: inout HTTPURLResponse,
-        rawUrl: String
+        response: inout HTTPURLResponse
     ) {
-        var pathBlocks = blocks.filter { $0.key == rawUrl }.values
+        var pathBlocks = blocks.filter {
+            guard let urlString = response.url?.absoluteString,
+                  let escapedKey = $0.key.removingPercentEncoding,
+                  let regex = try? NSRegularExpression(pattern: escapedKey) else {
+                return false
+            }
+            return regex.matches(in: urlString, range: .init(location: 0, length: urlString.count)).count == 1
+        }.values
         
         if pathBlocks.isEmpty {
             pathBlocks = blocks.filter { $0.key == "all" }.values
