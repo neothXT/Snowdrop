@@ -70,7 +70,11 @@ struct ClassBuilder {
             \(accessModifier)func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
                 var key = "all"
                 if let path {
-                    key = baseUrl.appending(path: path).absoluteString
+                    if #available(iOS 16, *) {
+                        key = baseUrl.appending(path: path).absoluteString
+                    } else {
+                        key = baseUrl.appendingPathComponent(path).absoluteString
+                    }
                 }
                 requestBlocks[key] = block
             }
@@ -90,7 +94,11 @@ struct ClassBuilder {
             \(accessModifier)func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
                 var key = "all"
                 if let path {
-                    key = baseUrl.appending(path: path).absoluteString
+                    if #available(iOS 16, *) {
+                        key = baseUrl.appending(path: path).absoluteString
+                    } else {
+                        key = baseUrl.appendingPathComponent(path).absoluteString
+                    }
                 }
                 responseBlocks[key] = block
             }
