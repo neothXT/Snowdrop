@@ -17,9 +17,6 @@ A clear and concise description of what the bug is.
 **What kind of request were you trying to perfom? POST, GET, upload task, etc...**
 ...
 
-**Did you use macros and EndpointBuilders or good old Endpoint enum?**
-...
-
 ## Expected behavior
 A clear and concise description of what you expected to happen.
 
@@ -32,7 +29,6 @@ If applicable, add screenshots to help explain your problem.
 **Swift version:**
 **Snowdrop version:**
 **Platform:**
-**Dependency manager:**
 
 ## Additional context
 Add any other context about the problem here.
