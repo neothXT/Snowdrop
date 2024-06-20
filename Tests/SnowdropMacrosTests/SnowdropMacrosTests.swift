@@ -54,7 +54,11 @@ final class SnowdropMacrosTests: XCTestCase {
                 func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
                     var key = "all"
                     if let path {
-                        key = baseUrl.appending(path: path).absoluteString
+                        if #available (iOS 16, *) {
+                            key = baseUrl.appending(path: path).absoluteString
+                        } else {
+                            key = baseUrl.appendingPathComponent(path).absoluteString
+                        }
                     }
                     requestBlocks[key] = block
                 }
@@ -62,7 +66,11 @@ final class SnowdropMacrosTests: XCTestCase {
                 func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
                     var key = "all"
                     if let path {
-                        key = baseUrl.appending(path: path).absoluteString
+                        if #available (iOS 16, *) {
+                            key = baseUrl.appending(path: path).absoluteString
+                        } else {
+                            key = baseUrl.appendingPathComponent(path).absoluteString
+                        }
                     }
                     responseBlocks[key] = block
                 }
@@ -171,7 +179,11 @@ final class SnowdropMacrosTests: XCTestCase {
                 public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
                     var key = "all"
                     if let path {
-                        key = baseUrl.appending(path: path).absoluteString
+                        if #available (iOS 16, *) {
+                            key = baseUrl.appending(path: path).absoluteString
+                        } else {
+                            key = baseUrl.appendingPathComponent(path).absoluteString
+                        }
                     }
                     requestBlocks[key] = block
                 }
@@ -179,7 +191,11 @@ final class SnowdropMacrosTests: XCTestCase {
                 public func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
                     var key = "all"
                     if let path {
-                        key = baseUrl.appending(path: path).absoluteString
+                        if #available (iOS 16, *) {
+                            key = baseUrl.appending(path: path).absoluteString
+                        } else {
+                            key = baseUrl.appendingPathComponent(path).absoluteString
+                        }
                     }
                     responseBlocks[key] = block
                 }
