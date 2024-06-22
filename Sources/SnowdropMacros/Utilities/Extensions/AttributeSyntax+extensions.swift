@@ -58,7 +58,7 @@ extension AttributeSyntax {
     func urlParams(for url: String?) -> [URLParam] {
         guard let url else { return [] }
         
-        guard let regex = try? NSRegularExpression(pattern: #"\{[a-zA-Z_]*=[\\.\\a-zA-Z\-0-9\" ]*\}"#) else { return [] }
+        guard let regex = try? NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+=[a-zA-Z0-9\\.\\@\" ]*\}"#) else { return [] }
         let matches = regex.matches(in: url, range: NSRange(url.startIndex..., in: url))
         
         guard matches.count > 0 else { return [] }
