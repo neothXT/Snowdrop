@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - Service macro
-@attached(peer, names: suffixed(Service), suffixed(ServiceImpl))
+@attached(peer, names: arbitrary)
 public macro Service() = #externalMacro(module: "SnowdropMacros", type: "ServiceMacro")
 
 // MARK: - Mockable macro
