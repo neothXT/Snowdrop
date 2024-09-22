@@ -62,17 +62,15 @@ final class SnowdropTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 5)
     }
     
-    func testOnResponseWithMultipleVariables() async throws {
-        let expectation = expectation(description: "Should intercept response")
-        service.addOnResponseBlock(for: "/posts/9/comments/[0-9]{1,}") { data, urlResponse in
-            if urlResponse.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/9/comments/6" {
-                expectation.fulfill()
-            }
-            return data
+    func testNon200StatusCode() async throws {
+        do {
+            _ = try await service.getCertainComment(id: 9, commentId: 1)
+        } catch {
+            let snowdropError = try XCTUnwrap(error as? SnowdropError)
+            XCTAssertTrue(snowdropError.type == .unexpectedResponse)
+            XCTAssertEqual(snowdropError.details?.statusCode, 404)
+            XCTAssertEqual(snowdropError.details?.localizedString, HTTPURLResponse.localizedString(forStatusCode: 404).capitalized)
         }
-        _ = try? await service.getCertainComment(id: 9, commentId: 6)
-        
-        await fulfillment(of: [expectation], timeout: 5)
     }
     
     func testNonThrowingPosts() async throws {

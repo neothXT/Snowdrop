@@ -29,19 +29,14 @@ public extension Snowdrop.Core {
             (data, urlResponse) = try await session.data(for: finalRequest)
             session.finishTasksAndInvalidate()
         } catch {
-            try handleError(error as NSError)
+            throw handleError(error as NSError)
         }
         
-        guard var response = urlResponse as? HTTPURLResponse else {
-            throw SnowdropError(type: .failedToMapResponse)
-        }
-        
-        guard var finalData = data else {
-            return (data, response)
-        }
+        guard var response = urlResponse as? HTTPURLResponse else { throw SnowdropError(type: .failedToMapResponse) }
+        try handleNon200Code(from: response, data: data)
+        guard var finalData = data else { return (data, response) }
         
         applyResponseBlocks(responseBlocks, forData: &finalData, response: &response)
-        
         return (finalData, response)
     }
     
@@ -61,9 +56,7 @@ public extension Snowdrop.Core {
             responseBlocks: responseBlocks
         )
         
-        guard let unwrappedData = data else {
-            throw SnowdropError(type: .unexpectedResponse)
-        }
+        guard let unwrappedData = data else { throw SnowdropError(type: .unexpectedResponse) }
         
         do {
             let decodedData = try decoder.decode(T.self, from: unwrappedData)
@@ -81,6 +74,11 @@ public extension Snowdrop.Core {
         }
     }
     
+    private func handleNon200Code(from response: HTTPURLResponse, data: Data?) throws {
+        guard !(200..<300 ~= response.statusCode) else { return }
+        throw generateError(from: response, data: data)
+    }
+    
     private func getSession(pinningMode: PinningMode?, urlsExcludedFromPinning: [String]) -> URLSession {
         let operationQueue = OperationQueue()
         operationQueue.qualityOfService = .utility
@@ -88,18 +86,31 @@ public extension Snowdrop.Core {
         return URLSession(configuration: .default, delegate: delegate, delegateQueue: operationQueue)
     }
     
-    private func handleError(_ error: NSError) throws {
+    private func generateError(from response: HTTPURLResponse, data: Data? = nil) -> Error {
+        let errorDetails = SnowdropErrorDetails(
+            statusCode: response.statusCode,
+            localizedString: HTTPURLResponse.localizedString(forStatusCode: response.statusCode).capitalized,
+            headers: response.allHeaderFields
+        )
+        let SnowdropError = SnowdropError(type: .unexpectedResponse, details: errorDetails, data: data)
+        return  SnowdropError
+    }
+    
+    private func handleError(_ error: NSError, data: Data? = nil) -> Error {
         let networkErrorCodes = [
             NSURLErrorNetworkConnectionLost,
             NSURLErrorNotConnectedToInternet,
-            NSURLErrorCannotLoadFromNetwork
+            NSURLErrorCannotLoadFromNetwork,
+            NSURLErrorTimedOut
         ]
         
         let errorType: SnowdropError.ErrorType = networkErrorCodes.contains(error.code) ? .noInternetConnection : .unexpectedResponse
-        let errorDetails = SnowdropErrorDetails(statusCode: error.code,
-                                                localizedString: error.localizedDescription)
-        let SnowdropError = SnowdropError(type: errorType, details: errorDetails)
-        throw SnowdropError
+        let errorDetails = SnowdropErrorDetails(
+            statusCode: error.code,
+            localizedString: error.localizedDescription.capitalized
+        )
+        let SnowdropError = SnowdropError(type: errorType, details: errorDetails, data: data)
+        return SnowdropError
     }
 }
 
