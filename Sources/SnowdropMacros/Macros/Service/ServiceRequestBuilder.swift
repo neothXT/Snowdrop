@@ -62,21 +62,25 @@ struct ServiceRequestBuilder: ClassMethodBodyBuilderProtocol {
                 
                 return try\(details.doesThrow ? "" : "?") await Snowdrop.core.performRequestAndDecode(
                     request,
+                    baseUrl: baseUrl,
                     decoder: decoder,
                     pinning: pinningMode,
                     urlsExcludedFromPinning: urlsExcludedFromPinning,
                     requestBlocks: requestBlocks,
-                    responseBlocks: responseBlocks
+                    responseBlocks: responseBlocks,
+                    testJSONDictionary: testMode ? testJSONDictionary : nil
                 )
             """
         } else {
             requestImpl += """
                 _ = try\(details.doesThrow ? "" : "?") await Snowdrop.core.performRequest(
                     request,
+                    baseUrl: baseUrl,
                     pinning: pinningMode,
                     urlsExcludedFromPinning: urlsExcludedFromPinning,
                     requestBlocks: requestBlocks,
-                    responseBlocks: responseBlocks
+                    responseBlocks: responseBlocks,
+                    testJSONDictionary: testMode ? testJSONDictionary : nil
                 )
             """
         }

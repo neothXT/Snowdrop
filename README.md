@@ -20,6 +20,7 @@ Meet **Snowdrop** - type-safe, easy to use framework powered by Swift Macros cre
     - [Arguments' Default Values](#arguments-default-values)
     - [Interceptors](#interceptors)
     - [Mockable](#mockable)
+    - [JSON Injection](#json-injection)
 - [Acknowledgements](#acknowledgements)
 
 ## Installation
@@ -206,12 +207,27 @@ Snowdrop will automatically create a `EndpointServiceMock` class with all the pr
 
 ```Swift
 func testEmptyArrayResult() async throws {
-let mock = EndpointServiceMock(baseUrl: URL(string: "https://some.url")!
-mock.getPostsResult = .success([])
+    let mock = EndpointServiceMock(baseUrl: URL(string: "https://some.url")!
+    mock.getPostsResult = .success([])
 
-let result = try await mock.getPosts()
+    let result = try await mock.getPosts()
+    XCTAssertTrue(result.isEmpty)
+}
+```
 
-XCTAssertTrue(result.isEmpty)
+### JSON Injection
+
+If you'd like to test your service against mocked JSONs, you can easily do it. Just make sure you got your JSON mock somewhere in your project files, then instantiate your service with `testMode` flag set to `true` and determine for which request your mock should be injected like in the example below.
+
+```Swift
+func testJSONMockInjectsion() async throws {
+    let service = MyEndpointService(baseUrl: someBaseURL, testMode: true)
+    service.testJSONDictionary = ["users/123/info": "MyJSONMock"]
+    
+    let result = try await service.getUserInfo(id: 123)
+    XCTAssertTrue(result.firstName, "JSON")
+    XCTAssertTrue(result.lastName, "Bourne")
+}
 ```
 
 **Note that mocked methods will directly return stubbed result without accessing Snowdrop.Core so your beforeSend and onResponse blocks won't be called.**

@@ -35,20 +35,25 @@ final class SnowdropMacrosTests: XCTestCase {
                 var requestBlocks: [String: RequestHandler] = [:]
                 var responseBlocks: [String: ResponseHandler] = [:]
             
+                var testJSONDictionary: [String: String]?
+            
                 var decoder: JSONDecoder
                 var pinningMode: PinningMode?
                 var urlsExcludedFromPinning: [String]
+                private let testMode: Bool
             
                 required init(
                     baseUrl: URL,
                     pinningMode: PinningMode? = nil,
                     urlsExcludedFromPinning: [String] = [],
-                    decoder: JSONDecoder = .init()
+                    decoder: JSONDecoder = .init(),
+                    testMode: Bool = false
                 ) {
                     self.baseUrl = baseUrl
                     self.pinningMode = pinningMode
                     self.urlsExcludedFromPinning = urlsExcludedFromPinning
                     self.decoder = decoder
+                    self.testMode = testMode
                 }
             
                 func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
@@ -97,11 +102,13 @@ final class SnowdropMacrosTests: XCTestCase {
             
                     return try await Snowdrop.core.performRequestAndDecode(
                         request,
+                        baseUrl: baseUrl,
                         decoder: decoder,
                         pinning: pinningMode,
                         urlsExcludedFromPinning: urlsExcludedFromPinning,
                         requestBlocks: requestBlocks,
-                        responseBlocks: responseBlocks
+                        responseBlocks: responseBlocks,
+                        testJSONDictionary: testMode ? testJSONDictionary : nil
                     )
                 }
             
@@ -160,20 +167,25 @@ final class SnowdropMacrosTests: XCTestCase {
                 public var requestBlocks: [String: RequestHandler] = [:]
                 public var responseBlocks: [String: ResponseHandler] = [:]
             
+                public var testJSONDictionary: [String: String]?
+            
                 public var decoder: JSONDecoder
                 public var pinningMode: PinningMode?
                 public var urlsExcludedFromPinning: [String]
+                private let testMode: Bool
             
                 public required init(
                     baseUrl: URL,
                     pinningMode: PinningMode? = nil,
                     urlsExcludedFromPinning: [String] = [],
-                    decoder: JSONDecoder = .init()
+                    decoder: JSONDecoder = .init(),
+                    testMode: Bool = false
                 ) {
                     self.baseUrl = baseUrl
                     self.pinningMode = pinningMode
                     self.urlsExcludedFromPinning = urlsExcludedFromPinning
                     self.decoder = decoder
+                    self.testMode = testMode
                 }
             
                 public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
@@ -222,11 +234,13 @@ final class SnowdropMacrosTests: XCTestCase {
             
                     return try await Snowdrop.core.performRequestAndDecode(
                         request,
+                        baseUrl: baseUrl,
                         decoder: decoder,
                         pinning: pinningMode,
                         urlsExcludedFromPinning: urlsExcludedFromPinning,
                         requestBlocks: requestBlocks,
-                        responseBlocks: responseBlocks
+                        responseBlocks: responseBlocks,
+                        testJSONDictionary: testMode ? testJSONDictionary : nil
                     )
                 }
             
@@ -285,20 +299,25 @@ final class SnowdropMacrosTests: XCTestCase {
                 public var requestBlocks: [String: RequestHandler] = [:]
                 public var responseBlocks: [String: ResponseHandler] = [:]
             
+                public var testJSONDictionary: [String: String]?
+            
                 public var decoder: JSONDecoder
                 public var pinningMode: PinningMode?
                 public var urlsExcludedFromPinning: [String]
+                private let testMode: Bool
             
                 public required init(
                     baseUrl: URL,
                     pinningMode: PinningMode? = nil,
                     urlsExcludedFromPinning: [String] = [],
-                    decoder: JSONDecoder = .init()
+                    decoder: JSONDecoder = .init(),
+                    testMode: Bool = false
                 ) {
                     self.baseUrl = baseUrl
                     self.pinningMode = pinningMode
                     self.urlsExcludedFromPinning = urlsExcludedFromPinning
                     self.decoder = decoder
+                    self.testMode = testMode
                 }
             
                 public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {

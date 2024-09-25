@@ -13,10 +13,12 @@ public extension Snowdrop.Core {
     @discardableResult
     func performRequest(
         _ request: URLRequest,
+        baseUrl: URL,
         pinning: PinningMode?,
         urlsExcludedFromPinning: [String],
         requestBlocks: [String: RequestHandler],
-        responseBlocks: [String: ResponseHandler]
+        responseBlocks: [String: ResponseHandler],
+        testJSONDictionary: [String: String]?
     ) async throws -> (Data?, HTTPURLResponse) {
         let session = getSession(pinningMode: pinning, urlsExcludedFromPinning: urlsExcludedFromPinning)
         var data: Data?
@@ -26,7 +28,7 @@ public extension Snowdrop.Core {
         applyRequestBlocks(requestBlocks, for: &finalRequest)
         
         do {
-            (data, urlResponse) = try await session.data(for: finalRequest)
+            (data, urlResponse) = try await executeRequest(baseUrl: baseUrl, session: session, request: finalRequest, testJSONDictionary: testJSONDictionary)
             session.finishTasksAndInvalidate()
         } catch {
             throw handleError(error as NSError)
@@ -42,18 +44,22 @@ public extension Snowdrop.Core {
     
     func performRequestAndDecode<T: Codable>(
         _ request: URLRequest,
+        baseUrl: URL,
         decoder: JSONDecoder,
         pinning: PinningMode?,
         urlsExcludedFromPinning: [String],
         requestBlocks: [String: RequestHandler],
-        responseBlocks: [String: ResponseHandler]
+        responseBlocks: [String: ResponseHandler],
+        testJSONDictionary: [String: String]?
     ) async throws -> T {
         let (data, _) = try await performRequest(
             request,
+            baseUrl: baseUrl,
             pinning: pinning,
             urlsExcludedFromPinning: urlsExcludedFromPinning,
             requestBlocks: requestBlocks,
-            responseBlocks: responseBlocks
+            responseBlocks: responseBlocks,
+            testJSONDictionary: testJSONDictionary
         )
         
         guard let unwrappedData = data else { throw SnowdropError(type: .unexpectedResponse) }
@@ -72,6 +78,33 @@ public extension Snowdrop.Core {
                 data: data
             )
         }
+    }
+    
+    func executeRequest(baseUrl: URL, session: URLSession, request: URLRequest, testJSONDictionary: [String: String]?) async throws -> (Data?, URLResponse?) {
+        var data: Data?
+        var urlResponse: URLResponse?
+        let jsonPaths = [".json", ".JSON"].reduce([]) { $0 + Bundle.main.paths(forResourcesOfType: $1, inDirectory: nil) }
+        
+        if let testJSONDictionary,
+           let requestUrl = request.url,
+           let key = testJSONDictionary.keys.first(where: { baseUrl.appendingPathComponent($0).absoluteString == requestUrl.absoluteString }),
+           let jsonName = testJSONDictionary[key],
+           let jsonPath = jsonPaths.first(where: { $0.hasSuffix(jsonName + ".json") || $0.hasSuffix(jsonName + ".JSON") }),
+           let jsonData = try? Data(contentsOf: URL(fileURLWithPath: jsonPath)) {
+            
+            data = jsonData
+            urlResponse = HTTPURLResponse(url: requestUrl, statusCode: 200, httpVersion: nil, headerFields: nil)
+            return (data, urlResponse)
+        }
+        
+        do {
+            (data, urlResponse) = try await session.data(for: request)
+            session.finishTasksAndInvalidate()
+        } catch {
+            throw handleError(error as NSError)
+        }
+        
+        return (data, urlResponse)
     }
     
     private func handleNon200Code(from response: HTTPURLResponse, data: Data?) throws {

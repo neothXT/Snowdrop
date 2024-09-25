@@ -32,20 +32,25 @@ struct ClassBuilder {
                     \(raw: accessModifier)var requestBlocks: [String: RequestHandler] = [:]
                     \(raw: accessModifier)var responseBlocks: [String: ResponseHandler] = [:]
                 
+                    \(raw: accessModifier)var testJSONDictionary: [String: String]?
+                
                     \(raw: accessModifier)var decoder: JSONDecoder
                     \(raw: accessModifier)var pinningMode: PinningMode?
                     \(raw: accessModifier)var urlsExcludedFromPinning: [String]
+                    private let testMode: Bool
                 
                     \(raw: accessModifier)required init(
                         baseUrl: URL,
                         pinningMode: PinningMode? = nil,
                         urlsExcludedFromPinning: [String] = [],
-                        decoder: JSONDecoder = .init()
+                        decoder: JSONDecoder = .init(),
+                        testMode: Bool = false
                     ) {
                         self.baseUrl = baseUrl
                         self.pinningMode = pinningMode
                         self.urlsExcludedFromPinning = urlsExcludedFromPinning
                         self.decoder = decoder
+                        self.testMode = testMode
                     }
                 
                 \(raw: ClassBuilder.buildBeforeSendingBlockFunc(for: type, accessModifier: accessModifier))
