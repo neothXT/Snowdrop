@@ -215,6 +215,8 @@ func testEmptyArrayResult() async throws {
 }
 ```
 
+**Note that mocked methods will directly return stubbed result without accessing Snowdrop.Core so your beforeSend and onResponse blocks won't be called.**
+
 ### JSON Injection
 
 If you'd like to test your service against mocked JSONs, you can easily do it. Just make sure you got your JSON mock somewhere in your project files, then instantiate your service with `testMode` flag set to `true` and determine for which request your mock should be injected like in the example below.
@@ -229,8 +231,6 @@ func testJSONMockInjectsion() async throws {
     XCTAssertTrue(result.lastName, "Bourne")
 }
 ```
-
-**Note that mocked methods will directly return stubbed result without accessing Snowdrop.Core so your beforeSend and onResponse blocks won't be called.**
 
 ## Acknowledgements
 
