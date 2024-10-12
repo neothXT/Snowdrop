@@ -42,7 +42,7 @@ extension AttributeSyntax {
             switch key {
             case .url:
                 argumentsList.url = argument.asString()
-                argumentsList.urlParams = urlParams(for: argument.asString())
+                argumentsList.urlParams = PathVariableFinder(url: argument.asString()).findParams()
             case .body:
                 argumentsList.body = argument.asString()
             case .headers:
@@ -53,25 +53,6 @@ extension AttributeSyntax {
         }
         
         return argumentsList
-    }
-    
-    func urlParams(for url: String?) -> [URLParam] {
-        guard let url else { return [] }
-        
-        guard let regex = try? NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+=[a-zA-Z0-9\\.\\@\" ]*\}"#) else { return [] }
-        let matches = regex.matches(in: url, range: NSRange(url.startIndex..., in: url))
-        
-        guard matches.count > 0 else { return [] }
-        
-        return matches.reduce([]) {
-            let results = String(url[Range($1.range, in: url)!]).split(separator: "=").map { String($0) }
-            guard results.count == 2 else { return $0 }
-            
-            let key = String(results[0].dropFirst())
-            let value = String(results[1].dropLast())
-            
-            return $0 + [.init(key: key, value: value)]
-        }
     }
 }
 

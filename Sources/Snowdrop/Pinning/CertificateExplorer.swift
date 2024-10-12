@@ -7,7 +7,7 @@
 
 import Foundation
 
-class CertificateExplorer {
+struct CertificateExplorer {
 	func fetchCertificates() -> [SecCertificate] {
 		var certificates: [SecCertificate] = []
 		
