@@ -12,7 +12,7 @@ import Foundation
 public macro Service() = #externalMacro(module: "SnowdropMacros", type: "ServiceMacro")
 
 // MARK: - Mockable macro
-@attached(peer, names: suffixed(ServiceMock))
+@attached(peer, names: suffixed(ServiceMock), suffixed(Mock))
 public macro Mockable() = #externalMacro(module: "SnowdropMacros", type: "MockableMacro")
 
 // MARK: - Modifier macros
