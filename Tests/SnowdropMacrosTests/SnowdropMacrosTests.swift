@@ -59,7 +59,7 @@ final class SnowdropMacrosTests: XCTestCase {
                 func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
                     var key = "all"
                     if let path {
-                        if #available (iOS 16, *) {
+                        if #available(iOS 16, *) {
                             key = baseUrl.appending(path: path).absoluteString
                         } else {
                             key = baseUrl.appendingPathComponent(path).absoluteString
@@ -71,7 +71,7 @@ final class SnowdropMacrosTests: XCTestCase {
                 func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
                     var key = "all"
                     if let path {
-                        if #available (iOS 16, *) {
+                        if #available(iOS 16, *) {
                             key = baseUrl.appending(path: path).absoluteString
                         } else {
                             key = baseUrl.appendingPathComponent(path).absoluteString
@@ -191,7 +191,7 @@ final class SnowdropMacrosTests: XCTestCase {
                 public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
                     var key = "all"
                     if let path {
-                        if #available (iOS 16, *) {
+                        if #available(iOS 16, *) {
                             key = baseUrl.appending(path: path).absoluteString
                         } else {
                             key = baseUrl.appendingPathComponent(path).absoluteString
@@ -203,7 +203,7 @@ final class SnowdropMacrosTests: XCTestCase {
                 public func addOnResponseBlock(for path: String? = nil, _ block: @escaping ResponseHandler) {
                     var key = "all"
                     if let path {
-                        if #available (iOS 16, *) {
+                        if #available(iOS 16, *) {
                             key = baseUrl.appending(path: path).absoluteString
                         } else {
                             key = baseUrl.appendingPathComponent(path).absoluteString
