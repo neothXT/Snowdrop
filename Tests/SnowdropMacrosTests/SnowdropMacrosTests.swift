@@ -16,7 +16,7 @@ final class SnowdropMacrosTests: XCTestCase {
             """
             @Service
             protocol TestEndpoint {
-                @GET(url: "/posts/{id=2}/comments")
+                @GET(url: "/posts/{id}/comments")
                 @Headers(["Content-Type": "application/json"])
                 @Body("model")
                 func getPosts(for id: Int, model: Model) async throws -> Post
@@ -40,20 +40,20 @@ final class SnowdropMacrosTests: XCTestCase {
                 var decoder: JSONDecoder
                 var pinningMode: PinningMode?
                 var urlsExcludedFromPinning: [String]
-                private let testMode: Bool
+                let verbose: Bool
             
                 required init(
                     baseUrl: URL,
                     pinningMode: PinningMode? = nil,
                     urlsExcludedFromPinning: [String] = [],
                     decoder: JSONDecoder = .init(),
-                    testMode: Bool = false
+                    verbose: Bool = false
                 ) {
                     self.baseUrl = baseUrl
                     self.pinningMode = pinningMode
                     self.urlsExcludedFromPinning = urlsExcludedFromPinning
                     self.decoder = decoder
-                    self.testMode = testMode
+                    self.verbose = verbose
                 }
             
                 func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
@@ -80,12 +80,12 @@ final class SnowdropMacrosTests: XCTestCase {
                     responseBlocks[key] = block
                 }
             
-                func getPosts(for id: Int = 2, model: Model) async throws -> Post {
+                func getPosts(for id: Int, model: Model) async throws -> Post {
                     let _queryItems: [QueryItem] = []
                     return try await getPosts(for: id, model: model, _queryItems: _queryItems)
                 }
 
-                func getPosts(for id: Int = 2, model: Model, _queryItems: [QueryItem]) async throws -> Post {
+                func getPosts(for id: Int, model: Model, _queryItems: [QueryItem]) async throws -> Post {
                     let url = baseUrl.appendingPathComponent("/posts/\\(id)/comments")
                     let headers: [String: Any] = ["Content-Type": "application/json"]
             
@@ -100,16 +100,7 @@ final class SnowdropMacrosTests: XCTestCase {
             
                     request.httpBody = data
             
-                    return try await Snowdrop.core.performRequestAndDecode(
-                        request,
-                        baseUrl: baseUrl,
-                        decoder: decoder,
-                        pinning: pinningMode,
-                        urlsExcludedFromPinning: urlsExcludedFromPinning,
-                        requestBlocks: requestBlocks,
-                        responseBlocks: responseBlocks,
-                        testJSONDictionary: testMode ? testJSONDictionary : nil
-                    )
+                    return try await Snowdrop.core.performRequestAndDecode(request, service: self)
                 }
             
                 private func prepareBasicRequest(url: URL, method: String, queryItems: [QueryItem], headers: [String: Any]) -> URLRequest {
@@ -172,20 +163,20 @@ final class SnowdropMacrosTests: XCTestCase {
                 public var decoder: JSONDecoder
                 public var pinningMode: PinningMode?
                 public var urlsExcludedFromPinning: [String]
-                private let testMode: Bool
+                public let verbose: Bool
             
                 public required init(
                     baseUrl: URL,
                     pinningMode: PinningMode? = nil,
                     urlsExcludedFromPinning: [String] = [],
                     decoder: JSONDecoder = .init(),
-                    testMode: Bool = false
+                    verbose: Bool = false
                 ) {
                     self.baseUrl = baseUrl
                     self.pinningMode = pinningMode
                     self.urlsExcludedFromPinning = urlsExcludedFromPinning
                     self.decoder = decoder
-                    self.testMode = testMode
+                    self.verbose = verbose
                 }
             
                 public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {
@@ -232,16 +223,7 @@ final class SnowdropMacrosTests: XCTestCase {
             
                     request.httpBody = Snowdrop.core.dataWithBoundary(file, payloadDescription: _payloadDescription)
             
-                    return try await Snowdrop.core.performRequestAndDecode(
-                        request,
-                        baseUrl: baseUrl,
-                        decoder: decoder,
-                        pinning: pinningMode,
-                        urlsExcludedFromPinning: urlsExcludedFromPinning,
-                        requestBlocks: requestBlocks,
-                        responseBlocks: responseBlocks,
-                        testJSONDictionary: testMode ? testJSONDictionary : nil
-                    )
+                    return try await Snowdrop.core.performRequestAndDecode(request, service: self)
                 }
             
                 private func prepareBasicRequest(url: URL, method: String, queryItems: [QueryItem], headers: [String: Any]) -> URLRequest {
@@ -304,20 +286,20 @@ final class SnowdropMacrosTests: XCTestCase {
                 public var decoder: JSONDecoder
                 public var pinningMode: PinningMode?
                 public var urlsExcludedFromPinning: [String]
-                private let testMode: Bool
+                public let verbose: Bool
             
                 public required init(
                     baseUrl: URL,
                     pinningMode: PinningMode? = nil,
                     urlsExcludedFromPinning: [String] = [],
                     decoder: JSONDecoder = .init(),
-                    testMode: Bool = false
+                    verbose: Bool = false
                 ) {
                     self.baseUrl = baseUrl
                     self.pinningMode = pinningMode
                     self.urlsExcludedFromPinning = urlsExcludedFromPinning
                     self.decoder = decoder
-                    self.testMode = testMode
+                    self.verbose = verbose
                 }
             
                 public func addBeforeSendingBlock(for path: String? = nil, _ block: @escaping RequestHandler) {

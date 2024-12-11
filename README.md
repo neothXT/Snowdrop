@@ -21,6 +21,7 @@ Meet **Snowdrop** - type-safe, easy to use framework powered by Swift Macros cre
     - [Interceptors](#interceptors)
     - [Mockable](#mockable)
     - [JSON Injection](#json-injection)
+    - [Verbose](#verbose)
 - [Acknowledgements](#acknowledgements)
 
 ## Installation
@@ -219,17 +220,25 @@ func testEmptyArrayResult() async throws {
 
 ### JSON Injection
 
-If you'd like to test your service against mocked JSONs, you can easily do it. Just make sure you got your JSON mock somewhere in your project files, then instantiate your service with `testMode` flag set to `true` and determine for which request your mock should be injected like in the example below.
+If you'd like to test your service against mocked JSONs, you can easily do it. Just make sure you got your JSON mock somewhere in your project files, then instantiate your service and determine for which request your mock should be injected like in the example below.
 
 ```Swift
 func testJSONMockInjectsion() async throws {
-    let service = MyEndpointService(baseUrl: someBaseURL, testMode: true)
+    let service = MyEndpointService(baseUrl: someBaseURL)
     service.testJSONDictionary = ["users/123/info": "MyJSONMock"]
     
     let result = try await service.getUserInfo(id: 123)
     XCTAssertTrue(result.firstName, "JSON")
     XCTAssertTrue(result.lastName, "Bourne")
 }
+```
+
+### Verbose
+
+If you'd like to get see logs from Snowdrop, use `verbose` flag when creating new instance of your service.
+
+```Swift
+let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!, verbose: true)
 ```
 
 ## Acknowledgements

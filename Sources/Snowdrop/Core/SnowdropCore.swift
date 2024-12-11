@@ -6,30 +6,27 @@
 //
 
 import Foundation
+import OSLog
 
 // MARK: Request perform methods
 
 public extension Snowdrop.Core {
+    private var logger: Logger { Logger() }
+    
     @discardableResult
     func performRequest(
         _ request: URLRequest,
-        baseUrl: URL,
-        pinning: PinningMode?,
-        urlsExcludedFromPinning: [String],
-        requestBlocks: [String: RequestHandler],
-        responseBlocks: [String: ResponseHandler],
-        testJSONDictionary: [String: String]?
+        service: Service
     ) async throws -> (Data?, HTTPURLResponse) {
-        let session = getSession(pinningMode: pinning, urlsExcludedFromPinning: urlsExcludedFromPinning)
+        let session = getSession(pinningMode: service.pinningMode, urlsExcludedFromPinning: service.urlsExcludedFromPinning)
         var data: Data?
         var urlResponse: URLResponse?
         
         var finalRequest = request
-        applyRequestBlocks(requestBlocks, for: &finalRequest)
+        applyRequestBlocks(service.requestBlocks, for: &finalRequest)
         
         do {
-            (data, urlResponse) = try await executeRequest(baseUrl: baseUrl, session: session, request: finalRequest, testJSONDictionary: testJSONDictionary)
-            session.finishTasksAndInvalidate()
+            (data, urlResponse) = try await executeRequest(finalRequest, session: session, service: service)
         } catch {
             throw handleError(error as NSError)
         }
@@ -38,36 +35,24 @@ public extension Snowdrop.Core {
         try handleNon200Code(from: response, data: data)
         guard var finalData = data else { return (data, response) }
         
-        applyResponseBlocks(responseBlocks, forData: &finalData, response: &response)
+        applyResponseBlocks(service.responseBlocks, forData: &finalData, response: &response)
+        log(level: .info, message: "Request finished. Response:\n\(String(data: finalData, encoding: .utf8) ?? "")", execute: service.verbose)
         return (finalData, response)
     }
     
     func performRequestAndDecode<T: Codable>(
         _ request: URLRequest,
-        baseUrl: URL,
-        decoder: JSONDecoder,
-        pinning: PinningMode?,
-        urlsExcludedFromPinning: [String],
-        requestBlocks: [String: RequestHandler],
-        responseBlocks: [String: ResponseHandler],
-        testJSONDictionary: [String: String]?
+        service: Service
     ) async throws -> T {
-        let (data, _) = try await performRequest(
-            request,
-            baseUrl: baseUrl,
-            pinning: pinning,
-            urlsExcludedFromPinning: urlsExcludedFromPinning,
-            requestBlocks: requestBlocks,
-            responseBlocks: responseBlocks,
-            testJSONDictionary: testJSONDictionary
-        )
+        let (data, _) = try await performRequest(request, service: service)
         
         guard let unwrappedData = data else { throw SnowdropError(type: .unexpectedResponse) }
         
         do {
-            let decodedData = try decoder.decode(T.self, from: unwrappedData)
+            let decodedData = try service.decoder.decode(T.self, from: unwrappedData)
             return decodedData
         } catch {
+            log(level: .error, message: "Response decoding failed.", execute: service.verbose)
             throw SnowdropError(
                 type: .failedToMapResponse,
                 details: .init(
@@ -80,14 +65,14 @@ public extension Snowdrop.Core {
         }
     }
     
-    func executeRequest(baseUrl: URL, session: URLSession, request: URLRequest, testJSONDictionary: [String: String]?) async throws -> (Data?, URLResponse?) {
+    func executeRequest(_ request: URLRequest, session: URLSession, service: Service) async throws -> (Data?, URLResponse?) {
         var data: Data?
         var urlResponse: URLResponse?
         let jsonPaths = [".json", ".JSON"].reduce([]) { $0 + Bundle.main.paths(forResourcesOfType: $1, inDirectory: nil) }
         
-        if let testJSONDictionary,
+        if let testJSONDictionary = service.testJSONDictionary,
            let requestUrl = request.url,
-           let key = testJSONDictionary.keys.first(where: { baseUrl.appendingPathComponent($0).absoluteString == requestUrl.absoluteString }),
+           let key = testJSONDictionary.keys.first(where: { service.baseUrl.appendingPathComponent($0).absoluteString == requestUrl.absoluteString }),
            let jsonName = testJSONDictionary[key],
            let jsonPath = jsonPaths.first(where: { $0.hasSuffix(jsonName + ".json") || $0.hasSuffix(jsonName + ".JSON") }),
            let jsonData = try? Data(contentsOf: URL(fileURLWithPath: jsonPath)) {
@@ -98,9 +83,11 @@ public extension Snowdrop.Core {
         }
         
         do {
+            log(level: .info, message: "Executing request \(request.url?.absoluteString ?? "unknown").", execute: service.verbose)
             (data, urlResponse) = try await session.data(for: request)
             session.finishTasksAndInvalidate()
         } catch {
+            log(level: .error, message: "Request failed\n\(handleError(error as NSError))", execute: service.verbose)
             throw handleError(error as NSError)
         }
         
@@ -236,6 +223,11 @@ private extension Snowdrop.Core {
             guard let value = valueOrNil($1.value) else { return $0 }
             return $0 + ["\($1.key)=\(value)"]
         }
+    }
+    
+    func log(level: OSLogType, message: String, execute: Bool) {
+        guard execute else { return }
+        logger.log(level: level, "[Snowdrop] \(message)")
     }
 }
 

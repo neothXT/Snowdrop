@@ -18,12 +18,13 @@ public protocol Service {
     var decoder: JSONDecoder { get set }
     var pinningMode: PinningMode? { get set }
     var urlsExcludedFromPinning: [String] { get set }
+    var verbose: Bool { get }
 
     init(baseUrl: URL,
          pinningMode: PinningMode?,
          urlsExcludedFromPinning: [String],
          decoder: JSONDecoder,
-         testMode: Bool
+         verbose: Bool
     )
     
     func addBeforeSendingBlock(for path: String?, _ block: @escaping RequestHandler)

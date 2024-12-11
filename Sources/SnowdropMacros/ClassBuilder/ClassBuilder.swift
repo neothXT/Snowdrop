@@ -37,20 +37,20 @@ struct ClassBuilder {
                     \(raw: accessModifier)var decoder: JSONDecoder
                     \(raw: accessModifier)var pinningMode: PinningMode?
                     \(raw: accessModifier)var urlsExcludedFromPinning: [String]
-                    private let testMode: Bool
+                    \(raw: accessModifier)let verbose: Bool
                 
                     \(raw: accessModifier)required init(
                         baseUrl: URL,
                         pinningMode: PinningMode? = nil,
                         urlsExcludedFromPinning: [String] = [],
                         decoder: JSONDecoder = .init(),
-                        testMode: Bool = false
+                        verbose: Bool = false
                     ) {
                         self.baseUrl = baseUrl
                         self.pinningMode = pinningMode
                         self.urlsExcludedFromPinning = urlsExcludedFromPinning
                         self.decoder = decoder
-                        self.testMode = testMode
+                        self.verbose = verbose
                     }
                 
                 \(raw: ClassBuilder.buildBeforeSendingBlockFunc(for: type, accessModifier: accessModifier))

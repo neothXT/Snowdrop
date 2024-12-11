@@ -14,6 +14,7 @@ struct PathVariableFinder {
     private let shortCollectionPattern = #"[ ]{0,1}=[ ]{0,1}\[[a-zA-Z0-9\\.\\@\" \\/\[\]\:\(\)\!]*\]"#
     private let shortTupleLikePattern = #"[ ]{0,1}=[ ]{0,1}\([a-zA-Z0-9\\.\\@\" \,\\/\[\]\:\(\)\!]*\)"#
     
+    private let simpleRegex = try? NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+\}"#)
     private let numericVarRegex = try? NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+[ ]{0,1}=[ ]{0,1}[0-9a-zA-Z\\.]*\}"#)
     private let stringRegex = try? NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+[ ]{0,1}=[ ]{0,1}\"[a-zA-Z0-9\\.\\@]*\"\}"#)
     private let instanceRegex = try? NSRegularExpression(pattern: #"\{[a-z]+[a-zA-Z0-9]+[ ]{0,1}=[ ]{0,1}[a-zA-Z0-9\\.]+\([a-zA-Z0-9\\.\\@\" \\/\[\]\:\(\)\!]+\)[\!]{0,1}\}"#)
@@ -47,12 +48,13 @@ struct PathVariableFinder {
         guard let url else { return "" }
         var outcome = url
         
-        let regexes = [
+        let regexes: [(String?, NSRegularExpression?)] = [
             (shortNumericVarPattern, numericVarRegex),
             (shortStringPattern, stringRegex),
             (shortInstancePattern, instanceRegex),
             (shortCollectionPattern, collectionRegex),
-            (shortTupleLikePattern, tupleLikeRegex)
+            (shortTupleLikePattern, tupleLikeRegex),
+            (nil, simpleRegex)
         ]
         
         regexes.forEach { shortRegex, regex in
@@ -70,7 +72,11 @@ struct PathVariableFinder {
                 outcome = outcome
                     .replacingOccurrences(of: "}", with: ")", range: range)
                     .replacingOccurrences(of: "{", with: "\\(", range: range)
-                    .replacingOccurrences(of: shortRegex, with: "", options: .regularExpression, range: range)
+                
+                if let shortRegex {
+                    outcome = outcome
+                        .replacingOccurrences(of: shortRegex, with: "", options: .regularExpression, range: range)
+                }
             }
         }
         

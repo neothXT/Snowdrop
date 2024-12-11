@@ -10,11 +10,11 @@ import XCTest
 
 final class SnowdropTests: XCTestCase {
     private let baseUrl = URL(string: "https://jsonplaceholder.typicode.com")!
-    private lazy var service = TestEndpointService(baseUrl: baseUrl)
+    private lazy var service = TestEndpointServiceImpl(baseUrl: baseUrl, verbose: true)
     private lazy var mock = TestEndpointServiceMock(baseUrl: baseUrl)
 
     func testGetTask() async throws {
-        let result = try await service.getPost()
+        let result = try await service.getPost(id: 2)
         XCTAssertTrue(result.id == 2)
     }
     
@@ -81,14 +81,14 @@ final class SnowdropTests: XCTestCase {
     func testPositiveGetTaskMock() async throws {
         let post = Post(id: 1, userId: 1, title: "Mock title", body: "Mock body")
         mock.getPostResult = .success(post)
-        let result = try await mock.getPost()
+        let result = try await mock.getPost(id: 5)
         XCTAssertTrue(post.title == result.title)
     }
     
     func testNegativeGetTaskMock() async throws {
         mock.getPostResult = .failure(SnowdropError(type: .unexpectedResponse))
         do {
-            let _ = try await mock.getPost()
+            let _ = try await mock.getPost(id: 4)
         } catch {
             let snowdropError = try XCTUnwrap(error as? SnowdropError)
             XCTAssertTrue(snowdropError.type == .unexpectedResponse)
