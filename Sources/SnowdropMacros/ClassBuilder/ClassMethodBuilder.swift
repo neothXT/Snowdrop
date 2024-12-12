@@ -37,10 +37,10 @@ extension ClassMethodBuilderProtocol {
         var extendedEnrichedParams = enrichedParams
         
         if passedArguments.isUploadingFile {
-            extendedEnrichedParams.append(.init(key: "_payloadDescription", type: "PayloadDescription?", value: nil))
+            extendedEnrichedParams.append(.init(key: "_payloadDescription", type: "PayloadDescription?", value: nil, optional: false))
         }
         
-        extendedEnrichedParams.append(.init(key: "_queryItems", type: "[QueryItem]", value: nil))
+        extendedEnrichedParams.append(.init(key: "_queryItems", type: "[QueryItem]", value: nil, optional: false))
         
         return .init(
             funcName: decl.name.text,
@@ -74,6 +74,8 @@ extension ClassMethodBuilderProtocol {
 
         return .init(
             url: try PathVariableFinder(url: url).escape(),
+            urlWithoutParams: try PathVariableFinder(url: url).strippedFromVariables(),
+            optionalParams: enrichedParams.filter(\.optional).map(\.keyWithoutPrefix),
             method: method,
             headers: passedArguments.headers ?? "[:]",
             body: body,

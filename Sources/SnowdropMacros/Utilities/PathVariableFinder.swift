@@ -82,4 +82,38 @@ struct PathVariableFinder {
         
         return outcome
     }
+    
+    func strippedFromVariables() throws -> String {
+        guard let url else { return "" }
+        var outcome = url
+        
+        let regexes = [
+            numericVarRegex,
+            stringRegex,
+            instanceRegex,
+            collectionRegex,
+            tupleLikeRegex,
+            simpleRegex,
+        ]
+        
+        regexes.forEach { regex in
+            guard let regex else { return }
+            let matchesCount = regex.matches(in: url, range: .init(location: 0, length: url.count)).count
+            (0 ..< matchesCount).forEach { _ in
+                guard let match = regex.firstMatch(in: outcome, range: .init(location: 0, length: outcome.count)),
+                      let _ = Range(match.range) else {
+                    return
+                }
+                
+                guard let startIndex = outcome.firstIndex(of: "{"), let endIndex = outcome.firstIndex(of: "}") else { return }
+                
+                let endIndexWithOffset = endIndex == outcome.endIndex ? endIndex : outcome.index(endIndex, offsetBy: 1)
+                let range = startIndex ..< endIndexWithOffset
+                
+                outcome = outcome.replacingCharacters(in: range, with: "")
+            }
+        }
+        
+        return outcome.replacingOccurrences(of: "//", with: "/")
+    }
 }

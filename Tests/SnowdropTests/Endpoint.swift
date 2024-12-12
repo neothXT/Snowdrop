@@ -25,6 +25,9 @@ public protocol TestEndpointService {
     @GET(url: "/posts/{id}")
     func getPost(id: Int) async throws -> Post
     
+    @GET(url: "/posts/{id}")
+    func getNullablePost(id: Int?) async throws -> Post
+    
     @GET(url: "/posts/{id=4}/comments")
     func getComments(id: Int) async throws -> [Comment]
     

@@ -18,6 +18,19 @@ final class SnowdropTests: XCTestCase {
         XCTAssertTrue(result.id == 2)
     }
     
+    func testGetTaskWithNullableParam() async throws {
+        let expectation = expectation(description: "Should not add 'nil' to path")
+        service.addBeforeSendingBlock { request in
+            if request.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/" {
+                expectation.fulfill()
+            }
+            return request
+        }
+        
+        _ = try? await service.getNullablePost(id: nil)
+        await fulfillment(of: [expectation], timeout: 5)
+    }
+    
     func testPostTask() async throws {
         let result = try await service.addPost(model: .init(id: 101, userId: 1, title: "Some title", body: "some body"))
         XCTAssertTrue(result.title == "Some title")

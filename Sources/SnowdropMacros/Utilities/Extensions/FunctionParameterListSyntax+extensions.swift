@@ -12,6 +12,15 @@ struct EnrichedParameter {
     let key: String
     let type: String
     let value: String?
+    let optional: Bool
+    
+    var keyWithoutPrefix: String {
+        if key.contains(" "), let argument = key.split(separator: " ").last {
+            return String(argument)
+        } else {
+            return key
+        }
+    }
     
     func toString() -> String {
         var result = "\(key): \(type)"
@@ -46,6 +55,6 @@ extension FunctionParameterSyntax {
             key += " \(secondName.text)"
         }
         
-        return .init(key: key, type: type.description, value: value?.replacingOccurrences(of: #"\"#, with: ""))
+        return .init(key: key, type: type.description, value: value?.replacingOccurrences(of: #"\"#, with: ""), optional: type.description.contains("?"))
     }
 }

@@ -18,6 +18,8 @@ struct FuncDetails {
 
 struct FuncBodyDetails {
     let url: String
+    let urlWithoutParams: String
+    let optionalParams: [String]
     let method: String
     let headers: String
     let body: EnrichedParameter?

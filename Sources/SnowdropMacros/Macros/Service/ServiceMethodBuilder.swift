@@ -32,10 +32,29 @@ struct ServiceMethodBuilder: ClassMethodBuilderProtocol  {
     private static func generateBody(details: FuncBodyDetails) -> String {
         """
         {
-            let url = baseUrl.appendingPathComponent("\(details.url)")
+            \(ServiceMethodBuilder.generateUrlPart(details: details))
             let headers: [String: Any] = \(details.headers)
             \(ServiceRequestBuilder.build(details: details))
         }
         """
+    }
+    
+    private static func generateUrlPart(details: FuncBodyDetails) -> String {
+        if !details.optionalParams.isEmpty {
+            let optionalString = details.optionalParams.map{ "let \($0)" }.joined(separator: ", ")
+            return """
+            let url: URL
+                if \(optionalString) {
+                    url = baseUrl.appendingPathComponent("\(details.url)")
+                } else {
+                    url = baseUrl.appendingPathComponent("\(details.urlWithoutParams)")
+                }
+            
+            """
+        } else {
+            return """
+            let url = baseUrl.appendingPathComponent("\(details.url)")
+            """
+        }
     }
 }
