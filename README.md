@@ -26,7 +26,7 @@ Meet **Snowdrop** - type-safe, easy to use framework powered by Swift Macros cre
 
 ## Installation
 
-Snowdrop is available via SPM. It works with iOS Deployment Target has to be 14.0 or newer. If you code for macOS, your Deployment Target has to be 11 or newer.
+Snowdrop is available via SPM. It works with iOS Deployment Target 14.0 or later. If you code for macOS, your Deployment Target has to be 11 or newer.
 
 ## Key Functionalities
 
@@ -91,7 +91,7 @@ To send requests, just initialize `MyEndpointService` instance and call function
 
 ```Swift
 let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
-let post = try await getPost(id: 7)
+let post = try await service.getPost(id: 7)
 ```
 
 ## Advanced Usage
