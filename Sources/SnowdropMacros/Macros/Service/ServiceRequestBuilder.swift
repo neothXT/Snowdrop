@@ -11,9 +11,26 @@ struct ServiceRequestBuilder: ClassMethodBodyBuilderProtocol {
     private init() { /* NOP */ }
     
     static func buildShort(details: FuncBodyDetails) -> String {
-        var requestImpl = """
-        let _queryItems: [QueryItem] = []
-        """
+        var requestImpl = ""
+        if let queryParams = details.queryParams {
+            let queryParamsList = queryParams
+                .replacingOccurrences(of: "[", with: "")
+                .replacingOccurrences(of: "]", with: "")
+                .replacingOccurrences(of: " ", with: "")
+                .replacingOccurrences(of: "\"", with: "")
+                .split(separator: ",")
+                .map { ".init(key: \"\($0)\", value: \($0))" }
+            
+            requestImpl = """
+            let _queryItems: [QueryItem] = [
+                    \(queryParamsList.joined(separator: ",\n"))
+                ]
+            """
+        } else {
+            requestImpl = """
+            let _queryItems: [QueryItem] = []
+            """
+        }
         
         if details.isUploadingFile {
             requestImpl += """

@@ -10,7 +10,7 @@ import SwiftSyntax
 
 extension AttributeSyntax {
     enum ArgumentType: String {
-        case url, body, tokenlabel, headers, requiresaccesstoken, fileupload, unknown
+        case url, body, tokenlabel, headers, requiresaccesstoken, fileupload, queryparams, unknown
     }
     
     struct PassedArgumentList {
@@ -18,6 +18,7 @@ extension AttributeSyntax {
         var body: String?
         var headers: String?
         var urlParams: [URLParam] = []
+        var queryParams: String?
         var isUploadingFile: Bool = false
         
         func merged(with argumentsList: PassedArgumentList) -> PassedArgumentList {
@@ -26,6 +27,7 @@ extension AttributeSyntax {
                 body: self.body ?? argumentsList.body,
                 headers: self.headers ?? argumentsList.headers,
                 urlParams: self.urlParams + argumentsList.urlParams,
+                queryParams: self.queryParams ?? argumentsList.queryParams,
                 isUploadingFile: self.isUploadingFile || argumentsList.isUploadingFile
             )
         }
@@ -47,6 +49,8 @@ extension AttributeSyntax {
                 argumentsList.body = argument.asString()
             case .headers:
                 argumentsList.headers = argument.asString()
+            case .queryparams:
+                argumentsList.queryParams = argument.asString()
             default:
                 return
             }
@@ -69,7 +73,11 @@ extension LabeledExprSyntax {
         expression.as(DictionaryExprSyntax.self)
     }
     
+    private var array: ArrayExprSyntax? {
+        expression.as(ArrayExprSyntax.self)
+    }
+    
     func asString() -> String? {
-        stringLiteral?.segments.description ?? dictionary?.description
+        stringLiteral?.segments.description ?? array?.description ?? dictionary?.description
     }
 }

@@ -145,7 +145,25 @@ _ = try await service.uploadImage(someImage, _payloadDescription: payload)
 
 ### Query Parameters
 
-Upon expanding macros, Snowdrop adds argument `_queryItems: [QueryItem]` to every service's function. For dynamic query parameters it's recommended to pass them using this argument like:
+With Snowdrop, you can pass your query params in two ways.
+
+First one is to use `@QueryParams` macro. To inform which arguments of your func are supposed to be query params, put them in array like this:
+
+```Swift
+@Service
+protocol MyEndpoint {
+
+    @GET(url: "/posts/{id}")
+    @QueryParams(["author"])
+    func getPost(id: Int, author: String) async throws -> Post
+}
+
+let authorName = "John Smith"
+let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
+let post = try await service.getPost(id: 7, author: authorName)
+```
+
+Alternatively, upon expanding macros, Snowdrop adds argument `_queryItems: [QueryItem]` to every service's function. Use it like this:
 
 ```Swift
 @Service

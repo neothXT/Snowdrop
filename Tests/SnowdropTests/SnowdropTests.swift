@@ -49,6 +49,19 @@ final class SnowdropTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 5)
     }
     
+    func testQuertItemsMacro() async throws {
+        let expectation = expectation(description: "Should contain queryItems")
+        service.addBeforeSendingBlock { request in
+            if request.url?.absoluteString == "https://jsonplaceholder.typicode.com/posts/12?boolVal=true&intVal=5&stringVal=five" {
+                expectation.fulfill()
+            }
+            return request
+        }
+        _ = try await service.getPostWithQueryItem(id: 12, boolVal: true, intVal: 5, stringVal: "five")
+        
+        await fulfillment(of: [expectation], timeout: 5)
+    }
+    
     func testInterception() async throws {
         let expectation = expectation(description: "Should intercept request")
         service.addBeforeSendingBlock { request in

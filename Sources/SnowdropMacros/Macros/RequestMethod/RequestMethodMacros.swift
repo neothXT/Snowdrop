@@ -89,6 +89,12 @@ public struct FileUploadMacro: PeerMacro {
     }
 }
 
+public struct QueryParamsMacro: PeerMacro {
+    public static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
+        try checkType(FunctionDeclSyntax.self, for: "QueryParams", declaration: declaration)
+    }
+}
+
 fileprivate func checkType<T: DeclSyntaxProtocol>(_ type: T.Type, for macroName: String, declaration: DeclSyntaxProtocol) throws -> [DeclSyntax] {
     guard let _ = declaration.as(T.self) else {
         throw RequestMacroError.badType(macroName: macroName, type: ProtocolDeclSyntax.self is T.Type ? "protocol" : "function")

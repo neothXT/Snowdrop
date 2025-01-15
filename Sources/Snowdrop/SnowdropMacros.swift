@@ -25,6 +25,9 @@ public macro Headers(_: [String: Any]) = #externalMacro(module: "SnowdropMacros"
 @attached(peer)
 public macro FileUpload() = #externalMacro(module: "SnowdropMacros", type: "FileUploadMacro")
 
+@attached(peer)
+public macro QueryParams(_: [String]) = #externalMacro(module: "SnowdropMacros", type: "QueryParamsMacro")
+
 
 // MARK: - RequestMethod macros
 @attached(peer)

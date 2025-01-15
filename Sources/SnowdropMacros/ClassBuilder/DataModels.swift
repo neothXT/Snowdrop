@@ -22,6 +22,7 @@ struct FuncBodyDetails {
     let optionalParams: [String]
     let method: String
     let headers: String
+    let queryParams: String?
     let body: EnrichedParameter?
     let returnType: String?
     let isUploadingFile: Bool

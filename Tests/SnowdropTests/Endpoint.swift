@@ -26,6 +26,10 @@ public protocol TestEndpointService {
     func getPost(id: Int) async throws -> Post
     
     @GET(url: "/posts/{id}")
+    @QueryParams(["boolVal", "intVal", "stringVal"])
+    func getPostWithQueryItem(id: Int, boolVal: Bool, intVal: Int, stringVal: String) async throws -> Post
+    
+    @GET(url: "/posts/{id}")
     func getNullablePost(id: Int?) async throws -> Post
     
     @GET(url: "/posts/{id=4}/comments")
