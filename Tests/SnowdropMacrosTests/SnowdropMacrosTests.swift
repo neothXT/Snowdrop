@@ -19,14 +19,15 @@ final class SnowdropMacrosTests: XCTestCase {
                 @GET(url: "/posts/{id}/comments")
                 @Headers(["Content-Type": "application/json"])
                 @Body("model")
-                func getPosts(for id: Int?, model: Model) async throws -> Post
+                @QueryParams(["test"])
+                func getPosts(for id: Int?, model: Model, test: Bool) async throws -> Post
             }
             """,
             expandedSource:
             """
             
             protocol TestEndpoint {
-                func getPosts(for id: Int?, model: Model) async throws -> Post
+                func getPosts(for id: Int?, model: Model, test: Bool) async throws -> Post
             }
             
             class TestEndpointService: TestEndpoint, Service {
@@ -80,12 +81,14 @@ final class SnowdropMacrosTests: XCTestCase {
                     responseBlocks[key] = block
                 }
             
-                func getPosts(for id: Int?, model: Model) async throws -> Post {
-                    let _queryItems: [QueryItem] = []
-                    return try await getPosts(for: id, model: model, _queryItems: _queryItems)
+                func getPosts(for id: Int?, model: Model, test: Bool) async throws -> Post {
+                    let _queryItems: [QueryItem] = [
+                        .init(key: "test", value: test)
+                    ]
+                    return try await getPosts(for: id, model: model, test: test, _queryItems: _queryItems)
                 }
 
-                func getPosts(for id: Int?, model: Model, _queryItems: [QueryItem]) async throws -> Post {
+                func getPosts(for id: Int?, model: Model, test: Bool, _queryItems: [QueryItem]) async throws -> Post {
                     let url: URL
                     if let id {
                         url = baseUrl.appendingPathComponent("/posts/\\(id)/comments")
@@ -135,7 +138,8 @@ final class SnowdropMacrosTests: XCTestCase {
                 "Service": ServiceMacro.self,
                 "GET": GetMacro.self,
                 "Headers": HeadersMacro.self,
-                "Body": BodyMacro.self
+                "Body": BodyMacro.self,
+                "QueryParams": QueryParamsMacro.self
             ]
         )
     }

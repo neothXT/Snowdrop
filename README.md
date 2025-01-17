@@ -1,4 +1,4 @@
-![alt [version]](https://img.shields.io/github/v/release/neothXT/Snowdrop) ![alt spm available](https://img.shields.io/badge/SPM-available-green) ![alt cocoapods available](https://img.shields.io/badge/CocoaPods-unavailable-red) ![alt carthage unavailable](https://img.shields.io/badge/Carthage-unavailable-red)
+![alt [version]](https://img.shields.io/github/v/release/neothXT/Snowdrop) ![alt spm available](https://img.shields.io/badge/SPM-available-green)
 
 # Snowdrop
 
@@ -26,7 +26,7 @@ Meet **Snowdrop** - type-safe, easy to use framework powered by Swift Macros cre
 
 ## Installation
 
-Snowdrop is available via SPM. It works with iOS Deployment Target 14.0 or later. If you code for macOS, your Deployment Target has to be 11 or newer.
+Snowdrop is available via SPM. It works with iOS Deployment Target 14.0 or later and macOS Deployment Target 11 or later.
 
 ## Key Functionalities
 
@@ -145,12 +145,28 @@ _ = try await service.uploadImage(someImage, _payloadDescription: payload)
 
 ### Query Parameters
 
-Upon expanding macros, Snowdrop adds argument `_queryItems: [QueryItem]` to every service's function. For dynamic query parameters it's recommended to pass them using this argument like:
+With Snowdrop, you can pass your query params in two ways.
+
+First one is to use `@QueryParams` macro. To inform which arguments of your func are supposed to be query params, put them in array like this:
 
 ```Swift
 @Service
 protocol MyEndpoint {
+    @GET(url: "/posts/{id}")
+    @QueryParams(["author"])
+    func getPost(id: Int, author: String) async throws -> Post
+}
 
+let authorName = "John Smith"
+let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
+let post = try await service.getPost(id: 7, author: authorName)
+```
+
+Alternatively, upon expanding macros, Snowdrop adds argument `_queryItems: [QueryItem]` to every service's function. Use it like this:
+
+```Swift
+@Service
+protocol MyEndpoint {
     @GET(url: "/posts/{id}")
     func getPost(id: Int) async throws -> Post
 }

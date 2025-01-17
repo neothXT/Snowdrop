@@ -78,6 +78,7 @@ extension ClassMethodBuilderProtocol {
             optionalParams: enrichedParams.filter(\.optional).map(\.keyWithoutPrefix),
             method: method,
             headers: passedArguments.headers ?? "[:]",
+            queryParams: passedArguments.queryParams,
             body: body,
             returnType: returnType,
             isUploadingFile: passedArguments.isUploadingFile,
