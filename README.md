@@ -91,7 +91,7 @@ To send requests, just initialize `MyEndpointService` instance and call function
 
 ```Swift
 let service = MyEndpointService(baseUrl: URL(string: "https://my-endpoint.com")!)
-let post = try await getPost(id: 7)
+let post = try await service.getPost(id: 7)
 ```
 
 ## Advanced Usage
