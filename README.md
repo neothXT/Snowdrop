@@ -1,5 +1,7 @@
 ![alt [version]](https://img.shields.io/github/v/release/neothXT/Snowdrop) ![alt spm available](https://img.shields.io/badge/SPM-available-green)
 
+![alt text](https://github.com/neothXT/Snowdrop/blob/main/Snowdrop_Logo.png)
+
 # Snowdrop
 
 Meet **Snowdrop** - type-safe, easy to use framework powered by Swift Macros created to let you build and maintain complex network requests with ease.
