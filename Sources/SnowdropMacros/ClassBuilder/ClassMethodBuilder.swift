@@ -37,7 +37,7 @@ extension ClassMethodBuilderProtocol {
         var extendedEnrichedParams = enrichedParams
         
         if passedArguments.isUploadingFile {
-            extendedEnrichedParams.append(.init(key: "_payloadDescription", type: "PayloadDescription?", value: nil, optional: false))
+            extendedEnrichedParams.append(.init(key: "_payloadDescription", type: "PayloadDescription", value: nil, optional: false))
         }
         
         extendedEnrichedParams.append(.init(key: "_queryItems", type: "[QueryItem]", value: nil, optional: false))

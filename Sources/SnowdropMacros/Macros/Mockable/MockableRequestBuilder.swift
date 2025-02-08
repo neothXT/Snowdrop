@@ -15,12 +15,12 @@ struct MockableRequestBuilder: ClassMethodBodyBuilderProtocol {
         let _queryItems: [QueryItem] = []
         """
         
-        if details.isUploadingFile {
+        if details.isUploadingFile, let body = details.body?.key {
             requestImpl += """
             
-                let _payloadDescription: PayloadDescription? = PayloadDescription(name: "payload",
-                                                                                  fileName: "payload",
-                                                                                  mimeType: MimeType(from: fileData).rawValue)
+                let _payloadDescription = PayloadDescription(name: "payload",
+                                                             fileName: "payload",
+                                                             mimeType: MimeType(fromFile: \(body))?.rawValue ?? "unknown")
             """
         }
         

@@ -7,7 +7,17 @@
 
 import Foundation
 
-enum MimeType: String {
+public protocol DataConvertible {
+    func toData() -> Data
+}
+
+extension Data: DataConvertible {
+    public func toData() -> Data {
+        self
+    }
+}
+
+public enum MimeType: String {
     case jpeg = "image/jpeg"
     case png = "image/png"
     case gif = "image/gif"
@@ -17,9 +27,9 @@ enum MimeType: String {
     case plain = "text/plain"
     case octetStream = "application/octet-stream"
     
-    init(from data: Data) {
+    public init?(fromFile file: DataConvertible) {
         var mimeByte: UInt8 = 0
-        data.copyBytes(to: &mimeByte, count: 1)
+        file.toData().copyBytes(to: &mimeByte, count: 1)
         
         switch mimeByte {
         case 0xFF:

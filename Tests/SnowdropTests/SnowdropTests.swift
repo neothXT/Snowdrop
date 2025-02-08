@@ -7,6 +7,7 @@
 
 import XCTest
 @testable import Snowdrop
+import AppKit
 
 final class SnowdropTests: XCTestCase {
     private let baseUrl = URL(string: "https://jsonplaceholder.typicode.com")!
@@ -114,7 +115,7 @@ final class SnowdropTests: XCTestCase {
     func testNegativeGetTaskMock() async throws {
         mock.getPostResult = .failure(SnowdropError(type: .unexpectedResponse))
         do {
-            let _ = try await mock.getPost(id: 4)
+            _ = try await mock.getPost(id: 4)
         } catch {
             let snowdropError = try XCTUnwrap(error as? SnowdropError)
             XCTAssertTrue(snowdropError.type == .unexpectedResponse)
@@ -124,10 +125,30 @@ final class SnowdropTests: XCTestCase {
     func testNonReturnableThrowableMock() async throws {
         mock.getNoResponsePostsResult = SnowdropError(type: .failedToMapResponse)
         do {
-            let _ = try await mock.getNoResponsePosts()
+            _ = try await mock.getNoResponsePosts()
         } catch {
             let snowdropError = try XCTUnwrap(error as? SnowdropError)
             XCTAssertTrue(snowdropError.type == .failedToMapResponse)
         }
+    }
+    
+    func testFileUpload() async throws {
+        let expectation = expectation(description: "Request body should contain payload description")
+        guard let imageData = NSData(contentsOf: URL(string: "https://github.com/neothXT/Snowdrop/blob/main/Snowdrop_Logo.png?raw=true")!)?.base64EncodedData() else {
+            throw SnowdropError(type: .unknown)
+        }
+        
+        service.addBeforeSendingBlock { request in
+            guard let bodyString = String(data: request.httpBody!, encoding: .utf8) else { return request }
+            
+            if bodyString.contains("Content-Disposition: form-data; name=") {
+                expectation.fulfill()
+            }
+            
+            return request
+        }
+        
+        _ = try? await service.uploadFile(body: imageData)
+        await fulfillment(of: [expectation], timeout: 5)
     }
 }

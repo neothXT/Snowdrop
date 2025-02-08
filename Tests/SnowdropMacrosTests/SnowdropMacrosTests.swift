@@ -152,14 +152,14 @@ final class SnowdropMacrosTests: XCTestCase {
                 @POST(url: "/file")
                 @FileUpload
                 @Body("file")
-                func uploadFile(file: UIImage) async throws -> Post
+                func uploadFile(file: Data) async throws -> Post
             }
             """,
             expandedSource:
             """
             
             public protocol TestEndpoint {
-                func uploadFile(file: UIImage) async throws -> Post
+                func uploadFile(file: Data) async throws -> Post
             }
             
             public class TestEndpointService: TestEndpoint, Service {
@@ -213,15 +213,15 @@ final class SnowdropMacrosTests: XCTestCase {
                     responseBlocks[key] = block
                 }
             
-                public func uploadFile(file: UIImage) async throws -> Post {
+                public func uploadFile(file: Data) async throws -> Post {
                     let _queryItems: [QueryItem] = []
-                    let _payloadDescription: PayloadDescription? = PayloadDescription(name: "payload",
-                                                                                      fileName: "payload",
-                                                                                      mimeType: MimeType(from: fileData).rawValue)
+                    let _payloadDescription = PayloadDescription(name: "payload",
+                                                                 fileName: "payload",
+                                                                 mimeType: MimeType(fromFile: file)?.rawValue ?? "unknown")
                     return try await uploadFile(file: file, _payloadDescription: _payloadDescription, _queryItems: _queryItems)
                 }
             
-                public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
+                public func uploadFile(file: Data, _payloadDescription: PayloadDescription, _queryItems: [QueryItem]) async throws -> Post {
                     let url = baseUrl.appendingPathComponent("/file")
                     let headers: [String: Any] = [:]
             
@@ -275,14 +275,14 @@ final class SnowdropMacrosTests: XCTestCase {
                 @POST(url: "/file")
                 @FileUpload
                 @Body("file")
-                func uploadFile(file: UIImage) async throws -> Post
+                func uploadFile(file: Data) async throws -> Post
             }
             """,
             expandedSource:
             """
             
             public protocol TestEndpoint {
-                func uploadFile(file: UIImage) async throws -> Post
+                func uploadFile(file: Data) async throws -> Post
             }
             
             public class TestEndpointServiceMock: TestEndpoint, Service {
@@ -325,15 +325,15 @@ final class SnowdropMacrosTests: XCTestCase {
                 public var addBeforeSendingBlockCallsCount = 0
                 public var addOnResponseBlockCallsCount = 0
             
-                public func uploadFile(file: UIImage) async throws -> Post {
+                public func uploadFile(file: Data) async throws -> Post {
                     let _queryItems: [QueryItem] = []
-                    let _payloadDescription: PayloadDescription? = PayloadDescription(name: "payload",
-                                                                                      fileName: "payload",
-                                                                                      mimeType: MimeType(from: fileData).rawValue)
+                    let _payloadDescription = PayloadDescription(name: "payload",
+                                                                 fileName: "payload",
+                                                                 mimeType: MimeType(fromFile: file)?.rawValue ?? "unknown")
                     return try await uploadFile(file: file, _payloadDescription: _payloadDescription, _queryItems: _queryItems)
                 }
             
-                public func uploadFile(file: UIImage, _payloadDescription: PayloadDescription?, _queryItems: [QueryItem]) async throws -> Post {
+                public func uploadFile(file: Data, _payloadDescription: PayloadDescription, _queryItems: [QueryItem]) async throws -> Post {
                     try uploadFileResult.get()
                 }
             }
@@ -341,7 +341,7 @@ final class SnowdropMacrosTests: XCTestCase {
             macros: [
                 "Mockable": MockableMacro.self,
                 "POST": GetMacro.self,
-                "Body": BodyMacro.self,
+                "Body": BodyMacro.self, 
                 "FileUpload": FileUploadMacro.self
             ]
         )

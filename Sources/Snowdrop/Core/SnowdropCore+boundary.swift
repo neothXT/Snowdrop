@@ -8,7 +8,7 @@
 import Foundation
 
 public extension Snowdrop.Core {
-    static func dataWithBoundary(_ file: Encodable, payloadDescription: PayloadDescription) -> Data {
+    func dataWithBoundary(_ file: Encodable, payloadDescription: PayloadDescription) -> Data {
         var data = Data()
         let contentDisposition = "Content-Disposition: form-data; name=\"\(payloadDescription.name)\"; filename=\"\(payloadDescription.fileName)\"\r\n"
         

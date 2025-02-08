@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 import Combine
 import Snowdrop
 
@@ -50,4 +51,8 @@ public protocol TestEndpointService {
     
     @GET(url: "posts")
     func getNoResponsePosts() async throws
+    
+    @FileUpload()
+    @POST(url: "posts")
+    func uploadFile(body: Data) async throws
 }
