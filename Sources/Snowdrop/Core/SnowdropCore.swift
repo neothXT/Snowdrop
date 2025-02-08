@@ -187,33 +187,29 @@ extension Snowdrop.Core {
 
 public extension Snowdrop.Core {
     func prepareUrlEncodedBody(data: Any) -> Data? {
-        var result: Data?
-        if let data = data as? Data {
-            result = data
-        } else if let model = data as? any Encodable,
-                  let data = mapToArray(dictionary: model.toDictionary()).joinedWithAmpersands().data(using: .utf8) {
-            result = data
-        } else if let dict = data as? [String: Any],
-                  let data = mapToArray(dictionary: dict).joinedWithAmpersands().data(using: .utf8) {
-            result = data
+        switch data {
+        case let data as Data:
+            data
+        case let data as any Encodable:
+            mapToArray(dictionary: data.toDictionary()).joinedWithAmpersands().data(using: .utf8)
+        case let data as [String: Any]:
+            mapToArray(dictionary: data).joinedWithAmpersands().data(using: .utf8)
+        default:
+            nil
         }
-        
-        return result
     }
     
     func prepareBody(data: Any) -> Data? {
-        var result: Data?
-        if let data = data as? Data {
-            result = data
-        } else if let model = data as? any Encodable,
-                  let data = try? model.toJsonData() {
-            result = data
-        } else if let dict = data as? [String: Any],
-                  let data = try? JSONSerialization.data(withJSONObject: dict, options: []) {
-            result = data
+        switch data {
+        case let data as Data:
+            data
+        case let data as any Encodable:
+            try? data.toJsonData()
+        case let data as [String: Any]:
+            try? JSONSerialization.data(withJSONObject: data)
+        default:
+            nil
         }
-        
-        return result
     }
 }
 

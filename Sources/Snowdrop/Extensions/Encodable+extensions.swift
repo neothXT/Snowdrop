@@ -25,7 +25,9 @@ extension Encodable {
     }
     
     private func removeEmptyCollections(from input: Any) -> Any {
-        if var array = input as? [Any?] {
+        switch input {
+        case let input as [Any?]:
+            var array = input
             array.enumerated().forEach { index, value in
                 guard let value else {
                     array.remove(at: index)
@@ -44,7 +46,9 @@ extension Encodable {
                 }
             }
             return array
-        } else if var dict = input as? [String: Any?] {
+            
+        case let input as [String: Any?]:
+            var dict = input
             dict.forEach { key, value in
                 guard let value else {
                     dict.removeValue(forKey: key)
@@ -63,17 +67,20 @@ extension Encodable {
                 }
             }
             return dict
+            
+        default:
+            return input
         }
-        return input
     }
     
     fileprivate func collectionCountOrNil(_ value: Any) -> Int? {
-        if let val = value as? Array<Any> {
-            return val.count
-        } else if let val = value as? Dictionary<String, Any> {
-            return val.count
-        } else {
-            return nil
+        switch value {
+        case let value as Array<Any>:
+            value.count
+        case let value as Dictionary<String, Any>:
+            value.count
+        default:
+            nil
         }
     }
 }

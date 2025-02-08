@@ -17,7 +17,7 @@ Meet **Snowdrop** - type-safe, easy to use framework powered by Swift Macros cre
     - [Default JSON Decoder](#default-json-decoder)
     - [SSL/Certificate Pinning](#sslcertificate-pinning)
     - [Body Argument](#body-argument)
-    - [File Upload](#file-upload)
+    - [File Upload using form-data](#file-upload-using--form-data)
     - [Query Parameters](#query-parameters)
     - [Arguments' Default Values](#arguments-default-values)
     - [Interceptors](#interceptors)
@@ -125,7 +125,7 @@ If you want to put some encodable object as a body of your request, you can eith
 func addPost(model: Post) async throws -> Data
 ```
 
-### File Upload
+### File Upload using form-data
 
 If you want to declare service's function that sends some file to the server as `multipart/form-data`, use `@FileUpload` macro. It'll automatically add `Content-Type: multipart/form-data` to the request's headers and extend the list of your function's arguments with `_payloadDescription: PayloadDescription` which you should then use to provide information such as `name`, `fileName` and `mimeType`.
 For mime types such as jpeg, png, gif, tiff, pdf, vnd, plain, octetStream, you don't have to provide `PayloadDescription`. Snowdrop can automatically recognize them and create `PayloadDescription` for you.
