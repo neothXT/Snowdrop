@@ -17,7 +17,7 @@ Meet **Snowdrop** - type-safe, easy to use framework powered by Swift Macros cre
     - [Default JSON Decoder](#default-json-decoder)
     - [SSL/Certificate Pinning](#sslcertificate-pinning)
     - [Body Argument](#body-argument)
-    - [File Upload using form-data](#file-upload-using--form-data)
+    - [File Upload using form-data](#file-upload-using-form-data)
     - [Query Parameters](#query-parameters)
     - [Arguments' Default Values](#arguments-default-values)
     - [Interceptors](#interceptors)
