@@ -1,4 +1,4 @@
-![alt [version]](https://img.shields.io/github/v/release/neothXT/Snowdrop) ![alt spm available](https://img.shields.io/badge/SPM-available-green)
+![alt [version]](https://img.shields.io/github/v/release/neothXT/Snowdrop) ![alt spm available](https://img.shields.io/badge/SPM-available-green) ![alt Swift 6.2.1](https://img.shields.io/badge/Swift-6.2.1-green)
 
 ![alt text](https://github.com/neothXT/Snowdrop/blob/main/Snowdrop_Logo.png)
 
