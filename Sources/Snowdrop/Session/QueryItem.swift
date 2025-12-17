@@ -9,9 +9,9 @@ import Foundation
 
 public struct QueryItem {
     public let key: String
-    public let value: Any
+    public let value: any Sendable
     
-    public init(key: String, value: Any) {
+    public init(key: String, value: any Sendable) {
         self.key = key
         self.value = value
     }

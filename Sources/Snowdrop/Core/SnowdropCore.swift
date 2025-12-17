@@ -110,7 +110,7 @@ public extension Snowdrop.Core {
         let errorDetails = SnowdropErrorDetails(
             statusCode: response.statusCode,
             localizedString: HTTPURLResponse.localizedString(forStatusCode: response.statusCode).capitalized,
-            headers: response.allHeaderFields
+            headers: response.allHeaderFields as? [String: any Sendable]
         )
         let SnowdropError = SnowdropError(type: .unexpectedResponse, details: errorDetails, data: data)
         return  SnowdropError

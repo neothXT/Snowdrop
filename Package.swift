@@ -29,19 +29,31 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency")
             ]
         ),
         .target(
             name: "Snowdrop",
-            dependencies: ["SnowdropMacros"]),
+            dependencies: ["SnowdropMacros"],
+        swiftSettings: [
+            .enableUpcomingFeature("StrictConcurrency")
+        ]),
         .testTarget(
             name: "SnowdropTests",
-            dependencies: ["Snowdrop", "SnowdropMacros"]),
+            dependencies: ["Snowdrop", "SnowdropMacros"],
+        swiftSettings: [
+            .enableUpcomingFeature("StrictConcurrency")
+        ]),
         .testTarget(
             name: "SnowdropMacrosTests",
             dependencies: [
                 "SnowdropMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency")
             ]
         )
     ]

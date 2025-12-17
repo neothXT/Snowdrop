@@ -42,12 +42,12 @@ public extension SnowdropError {
     }
 }
 
-public struct SnowdropErrorDetails: @unchecked Sendable {
+public struct SnowdropErrorDetails: Sendable {
     public let statusCode: Int
     public let localizedString: String
     public let url: URL?
     public let mimeType: String?
-    public let headers: [AnyHashable: Any]?
+    public let headers: [String: any Sendable]?
     /// Original (underlying) error
     public let ogError: Error?
     
@@ -56,8 +56,8 @@ public struct SnowdropErrorDetails: @unchecked Sendable {
         localizedString: String,
         url: URL? = nil,
         mimeType: String? = nil,
-        headers: [AnyHashable: Any]? = nil,
-        ogError: Error? = nil
+        headers: [String: any Sendable]? = nil,
+        ogError: (any Error)? = nil
     ) {
         self.statusCode = statusCode
         self.localizedString = localizedString

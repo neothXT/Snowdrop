@@ -7,8 +7,8 @@
 
 import Foundation
 
-public typealias RequestHandler = (URLRequest) -> URLRequest
-public typealias ResponseHandler = (Data, HTTPURLResponse) -> (Data)
+public typealias RequestHandler = @Sendable (URLRequest) -> URLRequest
+public typealias ResponseHandler = @Sendable (Data, HTTPURLResponse) -> (Data)
 
 public struct Snowdrop {
     public static let core = Core()
