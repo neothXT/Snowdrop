@@ -21,7 +21,7 @@ public struct SnowdropError: Error {
 }
 
 public extension SnowdropError {
-    enum ErrorType {
+    enum ErrorType: Sendable {
         case failedToMapResponse, unexpectedResponse, noInternetConnection, unknown
     }
     
@@ -42,7 +42,7 @@ public extension SnowdropError {
     }
 }
 
-public struct SnowdropErrorDetails {
+public struct SnowdropErrorDetails: @unchecked Sendable {
     public let statusCode: Int
     public let localizedString: String
     public let url: URL?

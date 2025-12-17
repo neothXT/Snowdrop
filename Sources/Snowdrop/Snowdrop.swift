@@ -17,7 +17,7 @@ public struct Snowdrop {
 // MARK: Core
 
 public extension Snowdrop {
-    struct Core {
+    struct Core: Sendable {
         fileprivate init() { /* NOP */ }
     }
 }

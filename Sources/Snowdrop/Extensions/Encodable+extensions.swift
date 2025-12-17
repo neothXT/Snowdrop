@@ -91,7 +91,7 @@ fileprivate extension Optional where Wrapped: Collection {
     }
 }
 
-public struct EncodableConversionOptions: OptionSet {
+public struct EncodableConversionOptions: OptionSet, Sendable {
     public let rawValue: Int
     
     public init(rawValue: Int) {

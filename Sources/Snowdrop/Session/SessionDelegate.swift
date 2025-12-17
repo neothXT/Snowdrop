@@ -8,17 +8,19 @@
 import Foundation
 import Combine
 
-public class SessionDelegate: NSObject, URLSessionDelegate {
+public final class SessionDelegate: NSObject, URLSessionDelegate, @unchecked Sendable {
 	private let certExplorer = CertificateExplorer()
     private let mode: PinningMode?
 	private let excludedURLs: [String]
 	
-	private lazy var pinnedCerts = certExplorer.fetchCertificates()
-	private lazy var pinnedKeys = certExplorer.fetchSLLKeys()
+    private let pinnedCerts: [SecCertificate]
+    private let pinnedKeys: [SecKey]
     
     public init(mode: PinningMode?, excludedURLs: [String]) {
         self.excludedURLs = excludedURLs
         self.mode = mode
+        pinnedKeys = certExplorer.fetchSLLKeys()
+        pinnedCerts = certExplorer.fetchCertificates()
     }
 	
 	public func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

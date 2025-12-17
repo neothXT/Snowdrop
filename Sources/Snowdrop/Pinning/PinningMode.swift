@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct PinningMode: OptionSet {
+public struct PinningMode: OptionSet, Sendable {
     public let rawValue: Int
     
     public init(rawValue: Int) {
